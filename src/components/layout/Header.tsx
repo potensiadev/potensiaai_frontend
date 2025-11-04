@@ -1,0 +1,48 @@
+import { Bell, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+export const Header = () => {
+  return (
+    <header className="fixed left-64 right-0 top-0 z-30 h-16 border-b border-border bg-card/80 backdrop-blur-md">
+      <div className="flex h-full items-center justify-between px-8">
+        <div className="flex items-center gap-4">
+          <h2 className="text-xl font-semibold text-foreground">대시보드</h2>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" className="relative">
+            <Bell className="h-5 w-5" />
+            <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-destructive" />
+          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-primary">
+                  <User className="h-4 w-4 text-white" />
+                </div>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>내 계정</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>프로필</DropdownMenuItem>
+              <DropdownMenuItem>플랜 및 결제</DropdownMenuItem>
+              <DropdownMenuItem>팀 설정</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>로그아웃</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+    </header>
+  );
+};
