@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
+import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,10 +16,51 @@ import {
 import { Sparkles, Send, Save, Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
+interface KeywordSuggestion {
+  keyword: string;
+  search_volume: string;
+  trend: string;
+}
+
 const Write = () => {
   const [keyword, setKeyword] = useState("");
   const [contentType, setContentType] = useState("");
   const [generatedContent, setGeneratedContent] = useState("");
+  const [suggestions, setSuggestions] = useState<KeywordSuggestion[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!keyword || keyword.length < 2) {
+      setSuggestions([]);
+      return;
+    }
+
+    const delay = setTimeout(() => {
+      fetchKeywords(keyword);
+    }, 600);
+
+    return () => clearTimeout(delay);
+  }, [keyword]);
+
+  const fetchKeywords = async (kw: string) => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase.functions.invoke("get-top-keywords", {
+        body: { keyword: kw },
+      });
+
+      if (error) throw error;
+
+      if (data.status === "success") {
+        setSuggestions(data.data);
+      }
+    } catch (err) {
+      console.error("키워드 API 호출 실패:", err);
+      setSuggestions([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Layout>
@@ -143,20 +185,51 @@ const Write = () => {
                 />
               </div>
             ) : (
-              <div className="flex min-h-[600px] items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/30">
-                <div className="text-center">
-                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-primary shadow-glow">
-                    <Sparkles className="h-8 w-8 text-white" />
+              <div className="space-y-6">
+                <div className="flex min-h-[400px] items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/30">
+                  <div className="text-center">
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-primary shadow-glow">
+                      <Sparkles className="h-8 w-8 text-white" />
+                    </div>
+                    <h4 className="mb-2 text-lg font-semibold text-foreground">
+                      AI 콘텐츠 생성 대기중
+                    </h4>
+                    <p className="text-sm text-muted-foreground">
+                      왼쪽에서 키워드와 설정을 입력하고
+                      <br />
+                      '콘텐츠 생성' 버튼을 클릭하세요
+                    </p>
                   </div>
-                  <h4 className="mb-2 text-lg font-semibold text-foreground">
-                    AI 콘텐츠 생성 대기중
-                  </h4>
-                  <p className="text-sm text-muted-foreground">
-                    왼쪽에서 키워드와 설정을 입력하고
-                    <br />
-                    '콘텐츠 생성' 버튼을 클릭하세요
-                  </p>
                 </div>
+
+                {/* Keyword Suggestions */}
+                {loading && (
+                  <p className="text-sm text-muted-foreground">
+                    AI가 키워드를 분석 중이에요...
+                  </p>
+                )}
+
+                {suggestions.length > 0 && (
+                  <div>
+                    <h4 className="mb-3 text-sm font-semibold text-foreground">
+                      🔍 추천 키워드 Top 10
+                    </h4>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      {suggestions.map((item, i) => (
+                        <div
+                          key={i}
+                          className="cursor-pointer rounded-lg border border-border bg-card p-3 transition-colors hover:bg-accent"
+                          onClick={() => setKeyword(item.keyword)}
+                        >
+                          <p className="font-medium text-foreground">{item.keyword}</p>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            🔍 검색량: {item.search_volume} / 📈 {item.trend}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
