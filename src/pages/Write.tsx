@@ -88,7 +88,7 @@ const Write = () => {
 
             <div className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="keyword">핵심 키워드</Label>
+                <Label htmlFor="keyword">키워드</Label>
                 <Input
                   id="keyword"
                   placeholder="예: 블로그 마케팅"
@@ -100,7 +100,36 @@ const Write = () => {
                 </p>
               </div>
 
-              <div className="space-y-2">
+              {/* Keyword Suggestions */}
+              {loading && (
+                <p className="text-sm text-muted-foreground">
+                  AI가 키워드를 분석 중이에요...
+                </p>
+              )}
+
+              {suggestions.length > 0 && (
+                <div>
+                  <h4 className="mb-3 text-sm font-semibold text-foreground">
+                    🔍 추천 키워드 Top 10
+                  </h4>
+                  <div className="grid grid-cols-1 gap-3">
+                    {suggestions.map((item, i) => (
+                      <div
+                        key={i}
+                        className="cursor-pointer rounded-lg border border-border bg-card p-3 transition-colors hover:bg-accent"
+                        onClick={() => setKeyword(item.keyword)}
+                      >
+                        <p className="font-medium text-foreground">{item.keyword}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          🔍 검색량: {item.search_volume} / 📈 {item.trend}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* <div className="space-y-2">
                 <Label htmlFor="content-type">글 유형</Label>
                 <Select value={contentType} onValueChange={setContentType}>
                   <SelectTrigger id="content-type">
@@ -142,7 +171,7 @@ const Write = () => {
                     <SelectItem value="vi">Tiếng Việt</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
+              </div> */}
 
               <Button
                 className="w-full bg-gradient-primary shadow-glow"
@@ -185,51 +214,20 @@ const Write = () => {
                 />
               </div>
             ) : (
-              <div className="space-y-6">
-                <div className="flex min-h-[400px] items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/30">
-                  <div className="text-center">
-                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-primary shadow-glow">
-                      <Sparkles className="h-8 w-8 text-white" />
-                    </div>
-                    <h4 className="mb-2 text-lg font-semibold text-foreground">
-                      AI 콘텐츠 생성 대기중
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      왼쪽에서 키워드와 설정을 입력하고
-                      <br />
-                      '콘텐츠 생성' 버튼을 클릭하세요
-                    </p>
+              <div className="flex min-h-[400px] items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/30">
+                <div className="text-center">
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-primary shadow-glow">
+                    <Sparkles className="h-8 w-8 text-white" />
                   </div>
-                </div>
-
-                {/* Keyword Suggestions */}
-                {loading && (
+                  <h4 className="mb-2 text-lg font-semibold text-foreground">
+                    AI 콘텐츠 생성 대기중
+                  </h4>
                   <p className="text-sm text-muted-foreground">
-                    AI가 키워드를 분석 중이에요...
+                    왼쪽에서 키워드를 입력하고
+                    <br />
+                    '콘텐츠 생성' 버튼을 클릭하세요
                   </p>
-                )}
-
-                {suggestions.length > 0 && (
-                  <div>
-                    <h4 className="mb-3 text-sm font-semibold text-foreground">
-                      🔍 추천 키워드 Top 10
-                    </h4>
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                      {suggestions.map((item, i) => (
-                        <div
-                          key={i}
-                          className="cursor-pointer rounded-lg border border-border bg-card p-3 transition-colors hover:bg-accent"
-                          onClick={() => setKeyword(item.keyword)}
-                        >
-                          <p className="font-medium text-foreground">{item.keyword}</p>
-                          <p className="mt-1 text-xs text-muted-foreground">
-                            🔍 검색량: {item.search_volume} / 📈 {item.trend}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                </div>
               </div>
             )}
 
