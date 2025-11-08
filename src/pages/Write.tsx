@@ -17,12 +17,6 @@ import {
 import { Sparkles, Send, Save, Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
-interface KeywordSuggestion {
-  keyword: string;
-  search_volume: string;
-  trend: string;
-}
-
 interface ValidationResult {
   seo_score: number;
   keyword_density: number;
@@ -34,11 +28,9 @@ interface ValidationResult {
 const Write = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [title, setTitle] = useState("");
-  const [keyword, setKeyword] = useState("");
   const [contentType, setContentType] = useState("");
   const [generatedContent, setGeneratedContent] = useState("");
-  const [generatedTopic, setGeneratedTopic] = useState("");
-  const [suggestions, setSuggestions] = useState<KeywordSuggestion[]>([]);
+  const [refinedTitles, setRefinedTitles] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [validating, setValidating] = useState(false);
@@ -56,41 +48,41 @@ const Write = () => {
   }, []);
 
   useEffect(() => {
-    if (!keyword || keyword.length < 2) {
-      setSuggestions([]);
+    if (!title || title.length < 2) {
+      setRefinedTitles([]);
       return;
     }
 
     const delay = setTimeout(() => {
-      fetchKeywords(keyword);
+      fetchRefinedTitles(title);
     }, 600);
 
     return () => clearTimeout(delay);
-  }, [keyword]);
+  }, [title]);
 
-  const fetchKeywords = async (kw: string) => {
+  const fetchRefinedTitles = async (inputTitle: string) => {
     try {
       setLoading(true);
-      const { data, error } = await supabase.functions.invoke("get-top-keywords", {
-        body: { keyword: kw },
+      const { data, error } = await supabase.functions.invoke("refine-keyword", {
+        body: { keyword: inputTitle },
       });
 
       if (error) throw error;
 
       if (data.status === "success") {
-        setSuggestions(data.data);
+        setRefinedTitles(data.titles || []);
       }
     } catch (err) {
-      console.error("키워드 API 호출 실패:", err);
-      setSuggestions([]);
+      console.error("추천 제목 API 호출 실패:", err);
+      setRefinedTitles([]);
     } finally {
       setLoading(false);
     }
   };
 
   const handleGenerateContent = async () => {
-    if (!keyword || keyword.trim().length === 0) {
-      alert("키워드를 입력해주세요.");
+    if (!title || title.trim().length === 0) {
+      alert("제목을 입력해주세요.");
       return;
     }
 
@@ -99,13 +91,12 @@ const Write = () => {
       setValidationResult(null);
       
       const { data, error } = await supabase.functions.invoke("generate-content", {
-        body: { keyword: keyword.trim() },
+        body: { keyword: title.trim() },
       });
 
       if (error) throw error;
 
       if (data.status === "success") {
-        setGeneratedTopic(data.data.topic);
         setGeneratedContent(data.data.content);
       } else if (data.error) {
         alert(data.error);
@@ -130,7 +121,7 @@ const Write = () => {
       const { data, error } = await supabase.functions.invoke("validate-content", {
         body: { 
           content: generatedContent,
-          keyword: keyword.trim(),
+          keyword: title.trim(),
         },
       });
 
@@ -187,42 +178,26 @@ const Write = () => {
                 </p>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="keyword">키워드</Label>
-                <Input
-                  id="keyword"
-                  placeholder="예: 블로그 마케팅"
-                  value={keyword}
-                  onChange={(e) => setKeyword(e.target.value)}
-                />
-                <p className="text-xs text-muted-foreground">
-                  검색 최적화를 위한 주요 키워드
-                </p>
-              </div>
-
-              {/* Keyword Suggestions */}
+              {/* Refined Title Suggestions */}
               {loading && (
                 <p className="text-sm text-muted-foreground">
-                  AI가 키워드를 분석 중이에요...
+                  AI가 추천 제목을 생성 중이에요...
                 </p>
               )}
 
-              {suggestions.length > 0 && (
+              {refinedTitles.length > 0 && (
                 <div>
                   <h4 className="mb-3 text-sm font-semibold text-foreground">
-                    🔍 추천 키워드 Top 10
+                    ✨ 추천 제목 Top 10
                   </h4>
                   <div className="grid grid-cols-1 gap-3">
-                    {suggestions.map((item, i) => (
+                    {refinedTitles.map((refinedTitle, i) => (
                       <div
                         key={i}
                         className="cursor-pointer rounded-lg border border-border bg-card p-3 transition-colors hover:bg-accent"
-                        onClick={() => setKeyword(item.keyword)}
+                        onClick={() => setTitle(refinedTitle)}
                       >
-                        <p className="font-medium text-foreground">{item.keyword}</p>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          🔍 검색량: {item.search_volume} / 📈 {item.trend}
-                        </p>
+                        <p className="font-medium text-foreground">{refinedTitle}</p>
                       </div>
                     ))}
                   </div>
@@ -277,7 +252,7 @@ const Write = () => {
                 className="w-full bg-gradient-primary shadow-glow"
                 size="lg"
                 onClick={handleGenerateContent}
-                disabled={generating || !keyword.trim()}
+                disabled={generating || !title.trim()}
               >
                 <Sparkles className="mr-2 h-5 w-5" />
                 {generating ? "생성 중..." : "콘텐츠 생성"}
