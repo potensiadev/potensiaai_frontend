@@ -45,7 +45,7 @@ const Keywords = () => {
   const [keyword, setKeyword] = useState("");
   const [suggestions, setSuggestions] = useState<KeywordSuggestion[]>([]);
   const [selectedKeyword, setSelectedKeyword] = useState<string | null>(null);
-  const [refinedTitle, setRefinedTitle] = useState<string>("");
+  const [refinedTitles, setRefinedTitles] = useState<string[]>([]);
   const [analysis, setAnalysis] = useState<KeywordAnalysis | null>(null);
   const [loading, setLoading] = useState(false);
   const [refining, setRefining] = useState(false);
@@ -86,7 +86,7 @@ const Keywords = () => {
   const handleRefineKeyword = async (kw: string) => {
     setSelectedKeyword(kw);
     setRefining(true);
-    setRefinedTitle("");
+    setRefinedTitles([]);
 
     try {
       const { data, error } = await supabase.functions.invoke("refine-keyword", {
@@ -96,7 +96,7 @@ const Keywords = () => {
       if (error) throw error;
 
       if (data.status === "success") {
-        setRefinedTitle(data.title);
+        setRefinedTitles(data.titles);
       } else {
         toast({
           title: "오류",
@@ -252,7 +252,7 @@ const Keywords = () => {
           {selectedKeyword && (
             <Card>
               <CardHeader>
-                <CardTitle>SEO 최적화 제목</CardTitle>
+                <CardTitle>SEO 최적화 제목 TOP 10</CardTitle>
                 <CardDescription>
                   선택한 키워드: <strong>{selectedKeyword}</strong>
                 </CardDescription>
@@ -262,9 +262,19 @@ const Keywords = () => {
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   </div>
-                ) : refinedTitle ? (
-                  <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
-                    <p className="text-lg font-medium">{refinedTitle}</p>
+                ) : refinedTitles.length > 0 ? (
+                  <div className="grid gap-3">
+                    {refinedTitles.map((title, index) => (
+                      <div
+                        key={index}
+                        className="flex items-start gap-3 p-4 bg-primary/5 border border-primary/20 rounded-lg hover:bg-primary/10 transition-colors cursor-pointer"
+                      >
+                        <Badge variant="outline" className="font-mono mt-1">
+                          #{index + 1}
+                        </Badge>
+                        <p className="text-base font-medium flex-1">{title}</p>
+                      </div>
+                    ))}
                   </div>
                 ) : null}
               </CardContent>
