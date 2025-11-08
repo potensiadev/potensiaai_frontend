@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -31,6 +32,8 @@ interface ValidationResult {
 }
 
 const Write = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [title, setTitle] = useState("");
   const [keyword, setKeyword] = useState("");
   const [contentType, setContentType] = useState("");
   const [generatedContent, setGeneratedContent] = useState("");
@@ -40,6 +43,17 @@ const Write = () => {
   const [generating, setGenerating] = useState(false);
   const [validating, setValidating] = useState(false);
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
+
+  // URL 파라미터에서 제목 불러오기
+  useEffect(() => {
+    const titleParam = searchParams.get('title');
+    if (titleParam) {
+      setTitle(decodeURIComponent(titleParam));
+      // URL 파라미터 제거
+      searchParams.delete('title');
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, []);
 
   useEffect(() => {
     if (!keyword || keyword.length < 2) {
@@ -161,6 +175,19 @@ const Write = () => {
 
             <div className="space-y-6">
               <div className="space-y-2">
+                <Label htmlFor="title">제목</Label>
+                <Input
+                  id="title"
+                  placeholder="글 제목을 입력하세요"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  SEO 최적화된 제목
+                </p>
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="keyword">키워드</Label>
                 <Input
                   id="keyword"
@@ -265,9 +292,9 @@ const Write = () => {
                 <h3 className="text-lg font-semibold text-foreground">
                   생성된 콘텐츠
                 </h3>
-                {generatedTopic && (
+                {title && (
                   <p className="mt-1 text-sm text-muted-foreground">
-                    제목: {generatedTopic}
+                    제목: {title}
                   </p>
                 )}
               </div>
