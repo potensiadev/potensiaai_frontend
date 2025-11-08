@@ -1,9 +1,20 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Search, TrendingUp, TrendingDown, Minus } from "lucide-react";
@@ -42,6 +53,7 @@ interface KeywordAnalysis {
 }
 
 const Keywords = () => {
+  const navigate = useNavigate();
   const [keyword, setKeyword] = useState("");
   const [suggestions, setSuggestions] = useState<KeywordSuggestion[]>([]);
   const [selectedKeyword, setSelectedKeyword] = useState<string | null>(null);
@@ -50,6 +62,8 @@ const Keywords = () => {
   const [loading, setLoading] = useState(false);
   const [refining, setRefining] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedTitle, setSelectedTitle] = useState<string>("");
   const { toast } = useToast();
 
   const fetchKeywords = async () => {
@@ -152,6 +166,16 @@ const Keywords = () => {
     if (trend.includes("상승")) return <TrendingUp className="h-4 w-4 text-green-500" />;
     if (trend.includes("하락")) return <TrendingDown className="h-4 w-4 text-red-500" />;
     return <Minus className="h-4 w-4 text-gray-500" />;
+  };
+
+  const handleTitleClick = (title: string) => {
+    setSelectedTitle(title);
+    setDialogOpen(true);
+  };
+
+  const handleStartWriting = () => {
+    navigate(`/write?title=${encodeURIComponent(selectedTitle)}`);
+    setDialogOpen(false);
   };
 
   return (
@@ -268,6 +292,7 @@ const Keywords = () => {
                       <div
                         key={index}
                         className="flex items-start gap-3 p-4 bg-primary/5 border border-primary/20 rounded-lg hover:bg-primary/10 transition-colors cursor-pointer"
+                        onClick={() => handleTitleClick(title)}
                       >
                         <Badge variant="outline" className="font-mono mt-1">
                           #{index + 1}
@@ -406,6 +431,21 @@ const Keywords = () => {
           )}
         </div>
       </div>
+
+      <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>이 제목으로 블로그 글을 작성할까요?</AlertDialogTitle>
+            <AlertDialogDescription>
+              선택한 제목: <strong className="text-foreground">{selectedTitle}</strong>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>나중에</AlertDialogCancel>
+            <AlertDialogAction onClick={handleStartWriting}>작성하기</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Layout>
   );
 };
