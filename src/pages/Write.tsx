@@ -22,12 +22,24 @@ interface KeywordSuggestion {
   trend: string;
 }
 
+interface ValidationResult {
+  seo_score: number;
+  keyword_density: number;
+  readability: string;
+  improvements: string[];
+  strengths: string[];
+}
+
 const Write = () => {
   const [keyword, setKeyword] = useState("");
   const [contentType, setContentType] = useState("");
   const [generatedContent, setGeneratedContent] = useState("");
+  const [generatedTopic, setGeneratedTopic] = useState("");
   const [suggestions, setSuggestions] = useState<KeywordSuggestion[]>([]);
   const [loading, setLoading] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [validating, setValidating] = useState(false);
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
 
   useEffect(() => {
     if (!keyword || keyword.length < 2) {
@@ -59,6 +71,67 @@ const Write = () => {
       setSuggestions([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGenerateContent = async () => {
+    if (!keyword || keyword.trim().length === 0) {
+      alert("키워드를 입력해주세요.");
+      return;
+    }
+
+    try {
+      setGenerating(true);
+      setValidationResult(null);
+      
+      const { data, error } = await supabase.functions.invoke("generate-content", {
+        body: { keyword: keyword.trim() },
+      });
+
+      if (error) throw error;
+
+      if (data.status === "success") {
+        setGeneratedTopic(data.data.topic);
+        setGeneratedContent(data.data.content);
+      } else if (data.error) {
+        alert(data.error);
+      }
+    } catch (err) {
+      console.error("콘텐츠 생성 실패:", err);
+      alert("콘텐츠 생성 중 오류가 발생했습니다. 다시 시도해주세요.");
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handleValidateContent = async () => {
+    if (!generatedContent || generatedContent.trim().length === 0) {
+      alert("먼저 콘텐츠를 생성해주세요.");
+      return;
+    }
+
+    try {
+      setValidating(true);
+      
+      const { data, error } = await supabase.functions.invoke("validate-content", {
+        body: { 
+          content: generatedContent,
+          keyword: keyword.trim(),
+        },
+      });
+
+      if (error) throw error;
+
+      if (data.status === "success") {
+        setValidationResult(data.data);
+      } else if (data.error) {
+        alert(data.error);
+      }
+    } catch (err) {
+      console.error("콘텐츠 검증 실패:", err);
+      alert("콘텐츠 검증 중 오류가 발생했습니다. 다시 시도해주세요.");
+    } finally {
+      setValidating(false);
     }
   };
 
@@ -176,9 +249,11 @@ const Write = () => {
               <Button
                 className="w-full bg-gradient-primary shadow-glow"
                 size="lg"
+                onClick={handleGenerateContent}
+                disabled={generating || !keyword.trim()}
               >
                 <Sparkles className="mr-2 h-5 w-5" />
-                콘텐츠 생성
+                {generating ? "생성 중..." : "콘텐츠 생성"}
               </Button>
             </div>
           </Card>
@@ -186,26 +261,54 @@ const Write = () => {
           {/* Editor Panel */}
           <Card className="p-6 shadow-md lg:col-span-2">
             <div className="mb-6 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-foreground">
-                생성된 콘텐츠
-              </h3>
+              <div>
+                <h3 className="text-lg font-semibold text-foreground">
+                  생성된 콘텐츠
+                </h3>
+                {generatedTopic && (
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    제목: {generatedTopic}
+                  </p>
+                )}
+              </div>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm">
-                  <Eye className="mr-2 h-4 w-4" />
-                  미리보기
-                </Button>
-                <Button variant="outline" size="sm">
+                {generatedContent && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleValidateContent}
+                    disabled={validating}
+                  >
+                    <Eye className="mr-2 h-4 w-4" />
+                    {validating ? "검증 중..." : "검증"}
+                  </Button>
+                )}
+                <Button variant="outline" size="sm" disabled={!generatedContent}>
                   <Save className="mr-2 h-4 w-4" />
                   임시저장
                 </Button>
-                <Button size="sm" className="bg-gradient-primary">
+                <Button size="sm" className="bg-gradient-primary" disabled={!generatedContent}>
                   <Send className="mr-2 h-4 w-4" />
                   발행
                 </Button>
               </div>
             </div>
 
-            {generatedContent ? (
+            {generating ? (
+              <div className="flex min-h-[400px] items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/30">
+                <div className="text-center">
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-primary shadow-glow animate-pulse">
+                    <Sparkles className="h-8 w-8 text-white" />
+                  </div>
+                  <h4 className="mb-2 text-lg font-semibold text-foreground">
+                    AI가 콘텐츠를 생성하고 있습니다...
+                  </h4>
+                  <p className="text-sm text-muted-foreground">
+                    잠시만 기다려주세요
+                  </p>
+                </div>
+              </div>
+            ) : generatedContent ? (
               <div className="space-y-4">
                 <Textarea
                   value={generatedContent}
@@ -232,20 +335,54 @@ const Write = () => {
             )}
 
             {/* SEO Metrics */}
-            <div className="mt-6 grid grid-cols-3 gap-4 rounded-lg bg-muted/50 p-4">
-              <div>
-                <p className="text-xs text-muted-foreground">SEO 점수</p>
-                <p className="mt-1 text-2xl font-bold text-success">85</p>
+            {validationResult && (
+              <div className="mt-6 space-y-4">
+                <div className="grid grid-cols-3 gap-4 rounded-lg bg-muted/50 p-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground">SEO 점수</p>
+                    <p className="mt-1 text-2xl font-bold text-success">
+                      {validationResult.seo_score}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">키워드 밀도</p>
+                    <p className="mt-1 text-2xl font-bold text-primary">
+                      {validationResult.keyword_density}%
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">가독성</p>
+                    <p className="mt-1 text-2xl font-bold text-secondary">
+                      {validationResult.readability}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Validation Details */}
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="rounded-lg border border-border bg-card p-4">
+                    <h4 className="mb-3 font-semibold text-foreground">✨ 강점</h4>
+                    <ul className="space-y-2">
+                      {validationResult.strengths.map((strength, i) => (
+                        <li key={i} className="text-sm text-muted-foreground">
+                          • {strength}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="rounded-lg border border-border bg-card p-4">
+                    <h4 className="mb-3 font-semibold text-foreground">💡 개선 사항</h4>
+                    <ul className="space-y-2">
+                      {validationResult.improvements.map((improvement, i) => (
+                        <li key={i} className="text-sm text-muted-foreground">
+                          • {improvement}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">키워드 밀도</p>
-                <p className="mt-1 text-2xl font-bold text-primary">2.3%</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">가독성</p>
-                <p className="mt-1 text-2xl font-bold text-secondary">좋음</p>
-              </div>
-            </div>
+            )}
           </Card>
         </div>
       </div>
