@@ -28,7 +28,8 @@ interface ValidationResult {
 const Write = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [title, setTitle] = useState("");
-  const [contentType, setContentType] = useState("");
+  const [contentLength, setContentLength] = useState("medium");
+  const [contentTone, setContentTone] = useState("professional");
   const [generatedContent, setGeneratedContent] = useState("");
   const [refinedTitles, setRefinedTitles] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -91,7 +92,11 @@ const Write = () => {
       setValidationResult(null);
       
       const { data, error } = await supabase.functions.invoke("generate-content", {
-        body: { keyword: title.trim() },
+        body: { 
+          keyword: title.trim(),
+          length: contentLength,
+          tone: contentTone,
+        },
       });
 
       if (error) throw error;
@@ -203,6 +208,34 @@ const Write = () => {
                   </div>
                 </div>
               )}
+
+              <div className="space-y-2">
+                <Label htmlFor="content-length">글 길이</Label>
+                <Select value={contentLength} onValueChange={setContentLength}>
+                  <SelectTrigger id="content-length">
+                    <SelectValue placeholder="길이 선택" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="short">짧게 (500-800자)</SelectItem>
+                    <SelectItem value="medium">보통 (1000-1500자)</SelectItem>
+                    <SelectItem value="long">길게 (2000-3000자)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="content-tone">글 톤</Label>
+                <Select value={contentTone} onValueChange={setContentTone}>
+                  <SelectTrigger id="content-tone">
+                    <SelectValue placeholder="톤 선택" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="professional">전문적</SelectItem>
+                    <SelectItem value="friendly">친근한</SelectItem>
+                    <SelectItem value="persuasive">설득적</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
               {/* <div className="space-y-2">
                 <Label htmlFor="content-type">글 유형</Label>

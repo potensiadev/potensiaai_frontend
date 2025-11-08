@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { keyword } = await req.json();
+    const { keyword, length = "medium", tone = "professional" } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     if (!LOVABLE_API_KEY) {
@@ -74,6 +74,21 @@ serve(async (req) => {
     console.log("Generated topic:", generatedTopic);
 
     // Step 2: Content Generator - Generate full content
+    const lengthGuide: Record<string, string> = {
+      short: "500-800자 분량",
+      medium: "1000-1500자 분량",
+      long: "2000-3000자 분량"
+    };
+
+    const toneGuide: Record<string, string> = {
+      professional: "전문적이고 신뢰감 있는 톤",
+      friendly: "친근하고 대화하는 듯한 톤",
+      persuasive: "설득력 있고 행동을 유도하는 톤"
+    };
+
+    const selectedLengthGuide = lengthGuide[length] || "1000-1500자 분량";
+    const selectedToneGuide = toneGuide[tone] || "전문적이고 신뢰감 있는 톤";
+
     const generatorPrompt = `당신은 전문 콘텐츠 작가이자 SEO 전문가입니다.
 다음 제목으로 고품질의 SEO 최적화된 블로그 콘텐츠를 작성하세요.
 
@@ -81,8 +96,9 @@ serve(async (req) => {
 키워드: ${keyword}
 
 요구사항:
-- 2000-3000자 분량의 완성된 블로그 글
-- 도입부, 본문(소제목 3-5개), 결론으로 구성
+- ${selectedLengthGuide}의 완성된 블로그 글
+- ${selectedToneGuide}으로 작성
+- 도입부, 본문(소제목 2-5개), 결론으로 구성
 - 마크다운 형식으로 작성 (# 제목, ## 소제목, **강조** 등 사용)
 - 키워드를 자연스럽게 본문에 2-3% 밀도로 포함
 - 독자에게 실용적인 정보와 인사이트 제공
