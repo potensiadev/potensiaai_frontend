@@ -21,25 +21,32 @@ serve(async (req) => {
       );
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    if (!OPENAI_API_KEY) {
+      throw new Error("OPENAI_API_KEY is not configured");
     }
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const SYSTEM_PROMPT = `당신은 SEO 키워드 전문가입니다. 사용자가 입력한 키워드와 관련된 상위 10개의 연관 키워드를 추천해주세요.
+
+규칙:
+1. 각 키워드에 대해 예상 월간 검색량과 트렌드를 함께 제공하세요
+2. 검색량은 쉼표가 포함된 형식으로 제공 (예: "10,000")
+3. 트렌드는 "상승세", "안정", "하락세" 중 하나로 제공
+4. 한국어로 자연스러운 키워드를 제공하세요
+5. 응답은 반드시 JSON 배열 형식으로만 제공: [{"keyword": "키워드", "search_volume": "10,000", "trend": "상승세"}]`;
+
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "gpt-4o-mini",
         messages: [
           {
             role: "system",
-            content: `당신은 SEO 키워드 전문가입니다. 사용자가 입력한 키워드와 관련된 상위 10개의 연관 키워드를 추천해주세요.
-각 키워드에 대해 예상 월간 검색량과 트렌드를 함께 제공하세요.
-응답은 반드시 JSON 배열 형식으로만 제공하세요: [{"keyword": "키워드", "search_volume": "10,000", "trend": "상승세"}]`
+            content: SYSTEM_PROMPT
           },
           {
             role: "user",
@@ -73,7 +80,8 @@ serve(async (req) => {
             }
           }
         ],
-        tool_choice: { type: "function", function: { name: "suggest_keywords" } }
+        tool_choice: { type: "function", function: { name: "suggest_keywords" } },
+        max_completion_tokens: 1500
       }),
     });
 
