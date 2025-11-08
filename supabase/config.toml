@@ -1,1 +1,16 @@
 project_id = "xpbmeosqosboxvgtayua"
+
+[functions.get-top-keywords]
+verify_jwt = false
+
+[functions.generate-content]
+verify_jwt = false
+
+[functions.validate-content]
+verify_jwt = false
+
+[functions.refine-keyword]
+verify_jwt = false
+
+[functions.analyze-keyword]
+verify_jwt = false
