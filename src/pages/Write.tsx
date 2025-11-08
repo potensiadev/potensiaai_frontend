@@ -31,9 +31,11 @@ const Write = () => {
   const [contentLength, setContentLength] = useState("medium");
   const [contentTone, setContentTone] = useState("professional");
   const [generatedContent, setGeneratedContent] = useState("");
+  const [thumbnailImage, setThumbnailImage] = useState("");
   const [refinedTitles, setRefinedTitles] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [generatingThumbnail, setGeneratingThumbnail] = useState(false);
   const [validating, setValidating] = useState(false);
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
 
@@ -142,6 +144,37 @@ const Write = () => {
       alert("콘텐츠 검증 중 오류가 발생했습니다. 다시 시도해주세요.");
     } finally {
       setValidating(false);
+    }
+  };
+
+  const handleGenerateThumbnail = async () => {
+    if (!generatedContent || generatedContent.trim().length === 0) {
+      alert("먼저 콘텐츠를 생성해주세요.");
+      return;
+    }
+
+    try {
+      setGeneratingThumbnail(true);
+      
+      const { data, error } = await supabase.functions.invoke("generate-thumbnail", {
+        body: { 
+          title: title.trim(),
+          content: generatedContent,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data.status === "success") {
+        setThumbnailImage(data.data.image);
+      } else if (data.error) {
+        alert(data.error);
+      }
+    } catch (err) {
+      console.error("썸네일 생성 실패:", err);
+      alert("썸네일 생성 중 오류가 발생했습니다. 다시 시도해주세요.");
+    } finally {
+      setGeneratingThumbnail(false);
     }
   };
 
@@ -308,15 +341,26 @@ const Write = () => {
               </div>
               <div className="flex gap-2">
                 {generatedContent && (
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={handleValidateContent}
-                    disabled={validating}
-                  >
-                    <Eye className="mr-2 h-4 w-4" />
-                    {validating ? "검증 중..." : "검증"}
-                  </Button>
+                  <>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={handleValidateContent}
+                      disabled={validating}
+                    >
+                      <Eye className="mr-2 h-4 w-4" />
+                      {validating ? "검증 중..." : "검증"}
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={handleGenerateThumbnail}
+                      disabled={generatingThumbnail}
+                    >
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      {generatingThumbnail ? "생성 중..." : "썸네일 생성"}
+                    </Button>
+                  </>
                 )}
                 <Button variant="outline" size="sm" disabled={!generatedContent}>
                   <Save className="mr-2 h-4 w-4" />
@@ -345,6 +389,16 @@ const Write = () => {
               </div>
             ) : generatedContent ? (
               <div className="space-y-4">
+                {thumbnailImage && (
+                  <div className="rounded-lg border border-border bg-card p-4">
+                    <h4 className="mb-3 font-semibold text-foreground">🖼️ 생성된 썸네일</h4>
+                    <img 
+                      src={thumbnailImage} 
+                      alt="Generated thumbnail" 
+                      className="w-full rounded-lg"
+                    />
+                  </div>
+                )}
                 <Textarea
                   value={generatedContent}
                   onChange={(e) => setGeneratedContent(e.target.value)}
