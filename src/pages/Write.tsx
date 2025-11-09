@@ -14,8 +14,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Sparkles, Send, Save, Eye } from "lucide-react";
+import { Sparkles, Send, Save, Eye, History, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useToast } from "@/hooks/use-toast";
 
 interface ValidationResult {
   seo_score: number;
@@ -25,8 +27,19 @@ interface ValidationResult {
   strengths: string[];
 }
 
+interface ContentHistory {
+  id: string;
+  title: string;
+  content: string;
+  thumbnail_image: string | null;
+  content_length: string;
+  content_tone: string;
+  created_at: string;
+}
+
 const Write = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { toast } = useToast();
   const [title, setTitle] = useState("");
   const [contentLength, setContentLength] = useState("medium");
   const [contentTone, setContentTone] = useState("professional");
@@ -38,6 +51,9 @@ const Write = () => {
   const [generatingThumbnail, setGeneratingThumbnail] = useState(false);
   const [validating, setValidating] = useState(false);
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
+  const [contentHistory, setContentHistory] = useState<ContentHistory[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
 
   // URL 파라미터에서 제목 불러오기
   useEffect(() => {
@@ -49,6 +65,37 @@ const Write = () => {
       setSearchParams(searchParams, { replace: true });
     }
   }, []);
+
+  // 히스토리 불러오기
+  useEffect(() => {
+    fetchContentHistory();
+  }, []);
+
+  const fetchContentHistory = async () => {
+    try {
+      setLoadingHistory(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        console.log("User not authenticated");
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("content_history")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(30);
+
+      if (error) throw error;
+      setContentHistory(data || []);
+    } catch (err) {
+      console.error("히스토리 불러오기 실패:", err);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
 
   useEffect(() => {
     if (!title || title.length < 2) {
@@ -105,6 +152,8 @@ const Write = () => {
 
       if (data.status === "success") {
         setGeneratedContent(data.data.content);
+        // 히스토리에 저장
+        await saveToHistory();
       } else if (data.error) {
         alert(data.error);
       }
@@ -167,6 +216,8 @@ const Write = () => {
 
       if (data.status === "success") {
         setThumbnailImage(data.data.image);
+        // 썸네일 생성 후 히스토리 업데이트
+        await saveToHistory();
       } else if (data.error) {
         alert(data.error);
       }
@@ -175,6 +226,87 @@ const Write = () => {
       alert("썸네일 생성 중 오류가 발생했습니다. 다시 시도해주세요.");
     } finally {
       setGeneratingThumbnail(false);
+    }
+  };
+
+  const saveToHistory = async () => {
+    if (!generatedContent || !title) return;
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "로그인이 필요합니다",
+          description: "히스토리를 저장하려면 로그인해주세요.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { error } = await supabase.from("content_history").insert({
+        user_id: user.id,
+        title: title,
+        content: generatedContent,
+        thumbnail_image: thumbnailImage || null,
+        content_length: contentLength,
+        content_tone: contentTone,
+      });
+
+      if (error) throw error;
+
+      // 히스토리 새로고침
+      await fetchContentHistory();
+      
+      toast({
+        title: "저장 완료",
+        description: "콘텐츠가 히스토리에 저장되었습니다.",
+      });
+    } catch (err) {
+      console.error("히스토리 저장 실패:", err);
+      toast({
+        title: "저장 실패",
+        description: "히스토리 저장 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const loadFromHistory = (history: ContentHistory) => {
+    setTitle(history.title);
+    setGeneratedContent(history.content);
+    setThumbnailImage(history.thumbnail_image || "");
+    setContentLength(history.content_length);
+    setContentTone(history.content_tone);
+    setShowHistory(false);
+    
+    toast({
+      title: "불러오기 완료",
+      description: "히스토리에서 콘텐츠를 불러왔습니다.",
+    });
+  };
+
+  const deleteFromHistory = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("content_history")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      await fetchContentHistory();
+      
+      toast({
+        title: "삭제 완료",
+        description: "히스토리에서 삭제되었습니다.",
+      });
+    } catch (err) {
+      console.error("히스토리 삭제 실패:", err);
+      toast({
+        title: "삭제 실패",
+        description: "히스토리 삭제 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -189,15 +321,27 @@ const Write = () => {
               키워드를 입력하고 AI가 SEO 최적화된 콘텐츠를 생성합니다
             </p>
           </div>
-          <Badge variant="secondary" className="bg-gradient-primary text-white">
-            <Sparkles className="mr-1 h-3 w-3" />
-            AI 기반
-          </Badge>
+          <div className="flex gap-2 items-center">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowHistory(!showHistory)}
+            >
+              <History className="mr-2 h-4 w-4" />
+              히스토리 {contentHistory.length > 0 && `(${contentHistory.length})`}
+            </Button>
+            <Badge variant="secondary" className="bg-gradient-primary text-white">
+              <Sparkles className="mr-1 h-3 w-3" />
+              AI 기반
+            </Badge>
+          </div>
         </div>
 
-        <div className="space-y-6">
-          {/* Settings Panel */}
-          <Card className="p-6 shadow-md">
+        <div className="grid gap-6 lg:grid-cols-12">
+          {/* Main Content Area */}
+          <div className="lg:col-span-9 space-y-6">
+            {/* Settings Panel */}
+            <Card className="p-6 shadow-md">
             <h3 className="mb-4 text-lg font-semibold text-foreground">
               생성 설정
             </h3>
@@ -429,6 +573,78 @@ const Write = () => {
             )}
           </Card>
         </div>
+
+        {/* History Sidebar */}
+        {showHistory && (
+          <div className="lg:col-span-3">
+            <Card className="p-4 shadow-md h-full">
+              <h3 className="mb-4 text-lg font-semibold text-foreground flex items-center gap-2">
+                <History className="h-5 w-5" />
+                콘텐츠 히스토리
+              </h3>
+              
+              {loadingHistory ? (
+                <div className="text-center py-8">
+                  <p className="text-sm text-muted-foreground">불러오는 중...</p>
+                </div>
+              ) : contentHistory.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-sm text-muted-foreground">
+                    아직 생성된 콘텐츠가 없습니다.
+                  </p>
+                </div>
+              ) : (
+                <ScrollArea className="h-[calc(100vh-250px)]">
+                  <div className="space-y-3">
+                    {contentHistory.map((history) => (
+                      <div
+                        key={history.id}
+                        className="group relative rounded-lg border border-border bg-card p-3 transition-colors hover:bg-accent cursor-pointer"
+                        onClick={() => loadFromHistory(history)}
+                      >
+                        <div className="pr-8">
+                          <h4 className="font-medium text-sm text-foreground line-clamp-2 mb-1">
+                            {history.title}
+                          </h4>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Badge variant="outline" className="text-xs">
+                              {history.content_length === "short" ? "짧게" : 
+                               history.content_length === "medium" ? "보통" : "길게"}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              {history.content_tone === "professional" ? "전문적" :
+                               history.content_tone === "friendly" ? "친근한" : "설득적"}
+                            </Badge>
+                          </div>
+                          <p className="mt-2 text-xs text-muted-foreground">
+                            {new Date(history.created_at).toLocaleDateString('ko-KR', {
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteFromHistory(history.id);
+                          }}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              )}
+            </Card>
+          </div>
+        )}
+      </div>
       </div>
     </Layout>
   );
