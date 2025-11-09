@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Keywords from "./pages/Keywords";
 import Write from "./pages/Write";
+import Thumbnails from "./pages/Thumbnails";
 import Projects from "./pages/Projects";
 import NotFound from "./pages/NotFound";
 
@@ -21,7 +22,7 @@ const App = () => (
           <Route path="/" element={<Dashboard />} />
           <Route path="/keywords" element={<Keywords />} />
           <Route path="/write" element={<Write />} />
-          <Route path="/thumbnails" element={<Navigate to="/write" replace />} />
+          <Route path="/thumbnails" element={<Thumbnails />} />
           <Route path="/projects" element={<Projects />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
