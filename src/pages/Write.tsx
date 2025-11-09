@@ -2,6 +2,13 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { supabase } from "@/integrations/supabase/client";
+import { 
+  generateFullContent, 
+  refineTopic, 
+  validateContent, 
+  fixContent,
+  APIError 
+} from "@/lib/api";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -135,20 +142,20 @@ const Write = () => {
       setLoading(true);
       setApiError(null);
 
-      const { data, error } = await supabase.functions.invoke('refine-keyword', {
-        body: { keyword: inputTitle }
-      });
-
-      if (error) throw error;
-
-      if (data?.status === "success" && data.titles) {
-        setRefinedTopic(data.titles[0]);
-        setRefinedTitles(data.titles);
+      const response = await refineTopic({ topic: inputTitle });
+      
+      if (response.refined_topic) {
+        setRefinedTopic(response.refined_topic);
+        setRefinedTitles([response.refined_topic]);
       }
     } catch (err) {
       console.error("제목 추천 실패:", err);
       setRefinedTitles([]);
-      setApiError(err instanceof Error ? err.message : "제목 추천 중 오류가 발생했습니다.");
+      if (err instanceof APIError) {
+        setApiError(`제목 개선 실패: ${err.message}`);
+      } else {
+        setApiError("제목 추천 중 오류가 발생했습니다. 네트워크 연결을 확인해주세요.");
+      }
     } finally {
       setLoading(false);
     }
@@ -169,19 +176,14 @@ const Write = () => {
       setValidationResult(null);
       setApiError(null);
 
-      const { data, error } = await supabase.functions.invoke('generate-content', {
-        body: { 
-          keyword: title.trim(),
-          length: contentLength,
-          tone: contentTone
-        }
+      const response = await generateFullContent({ 
+        topic: title.trim() 
       });
-
-      if (error) throw error;
-
-      if (data?.status === "success" && data.data) {
-        setGeneratedContent(data.data.content);
-        setRefinedTopic(data.data.topic);
+      
+      if (response.content) {
+        setGeneratedContent(response.content);
+        setRefinedTopic(response.refined_topic);
+        setValidationResult(response.validation);
 
         toast({
           title: "생성 완료",
@@ -196,9 +198,13 @@ const Write = () => {
       }
     } catch (err) {
       console.error("콘텐츠 생성 실패:", err);
-      const errorMessage = err instanceof Error
-        ? err.message
-        : "콘텐츠 생성 중 오류가 발생했습니다.";
+      let errorMessage = "콘텐츠 생성 중 오류가 발생했습니다.";
+      
+      if (err instanceof APIError) {
+        errorMessage = `콘텐츠 생성 실패: ${err.message}`;
+      } else if (err instanceof Error && err.message.includes("Failed to fetch")) {
+        errorMessage = "서버에 연결할 수 없습니다. 네트워크 연결을 확인해주세요.";
+      }
 
       setApiError(errorMessage);
       toast({
@@ -225,31 +231,12 @@ const Write = () => {
       setValidating(true);
       setApiError(null);
 
-      const { data, error } = await supabase.functions.invoke('validate-content', {
-        body: { 
-          content: generatedContent,
-          keyword: title
-        }
+      const response = await validateContent({ 
+        content: generatedContent.trim() 
       });
-
-      if (error) throw error;
-
-      if (data?.status === "success" && data.data) {
-        // Transform the validation result to match our ValidationResult interface
-        const validation: ValidationResult = {
-          scores: {
-            grammar: Math.round(data.data.seo_score * 0.1) || 7,
-            human: 8,
-            seo: Math.round(data.data.seo_score * 0.1) || 7
-          },
-          has_faq: generatedContent.toLowerCase().includes('faq') || generatedContent.toLowerCase().includes('자주 묻는'),
-          issues: data.data.improvements?.map((imp: string) => ({
-            type: "개선 필요",
-            message: imp
-          })) || []
-        };
-        
-        setValidationResult(validation);
+      
+      if (response.validation) {
+        setValidationResult(response.validation);
 
         toast({
           title: "검증 완료",
@@ -258,9 +245,13 @@ const Write = () => {
       }
     } catch (err) {
       console.error("콘텐츠 검증 실패:", err);
-      const errorMessage = err instanceof Error
-        ? err.message
-        : "콘텐츠 검증 중 오류가 발생했습니다.";
+      let errorMessage = "콘텐츠 검증 중 오류가 발생했습니다.";
+      
+      if (err instanceof APIError) {
+        errorMessage = `콘텐츠 검증 실패: ${err.message}`;
+      } else if (err instanceof Error && err.message.includes("Failed to fetch")) {
+        errorMessage = "서버에 연결할 수 없습니다. 네트워크 연결을 확인해주세요.";
+      }
 
       setApiError(errorMessage);
       toast({
@@ -274,11 +265,57 @@ const Write = () => {
   };
 
   const handleFixContent = async () => {
-    toast({
-      title: "수정 기능",
-      description: "자동 수정 기능은 현재 개발 중입니다.",
-      variant: "default",
-    });
+    if (!generatedContent.trim() || !validationResult) {
+      toast({
+        title: "입력 오류",
+        description: "검증 결과가 필요합니다.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setGenerating(true);
+      setApiError(null);
+
+      const response = await fixContent({
+        content: generatedContent.trim(),
+        validation_report: validationResult,
+        metadata: {
+          focus_keyphrase: refinedTopic || title,
+        }
+      });
+      
+      if (response.fixed_content) {
+        setGeneratedContent(response.fixed_content);
+        
+        toast({
+          title: "자동 수정 완료",
+          description: "콘텐츠가 자동으로 개선되었습니다.",
+        });
+        
+        // Re-validate after fixing
+        await handleValidateContent();
+      }
+    } catch (err) {
+      console.error("콘텐츠 수정 실패:", err);
+      let errorMessage = "콘텐츠 수정 중 오류가 발생했습니다.";
+      
+      if (err instanceof APIError) {
+        errorMessage = `콘텐츠 수정 실패: ${err.message}`;
+      } else if (err instanceof Error && err.message.includes("Failed to fetch")) {
+        errorMessage = "서버에 연결할 수 없습니다. 네트워크 연결을 확인해주세요.";
+      }
+
+      setApiError(errorMessage);
+      toast({
+        title: "수정 실패",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setGenerating(false);
+    }
   };
 
   const handleGenerateThumbnail = async () => {
