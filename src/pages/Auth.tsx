@@ -22,7 +22,9 @@ const Auth = () => {
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        navigate("/");
+        // Redirect to the page they came from, or dashboard
+        const from = new URLSearchParams(window.location.search).get('from') || '/';
+        navigate(from);
       }
       setCheckingAuth(false);
     };

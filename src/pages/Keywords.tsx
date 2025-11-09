@@ -71,11 +71,7 @@ const Keywords = () => {
 
     setLoading(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
       const { data, error } = await supabase.functions.invoke("get-top-keywords", {
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`
-        },
         body: { keyword: keyword.trim() },
       });
 
@@ -107,11 +103,7 @@ const Keywords = () => {
     setRefinedTitles([]);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
       const { data, error } = await supabase.functions.invoke("refine-keyword", {
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`
-        },
         body: { keyword: kw },
       });
 
@@ -120,7 +112,7 @@ const Keywords = () => {
       if (data.status === "success") {
         setRefinedTitles(data.titles);
         
-        // Save SEO titles to history
+        // Save SEO titles to history (only for logged-in users)
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           const titlesToSave = data.titles.map((title: string) => ({
@@ -130,6 +122,12 @@ const Keywords = () => {
           }));
           
           await supabase.from("seo_titles_history").insert(titlesToSave);
+        } else {
+          toast({
+            title: "알림",
+            description: "히스토리를 저장하려면 로그인이 필요합니다.",
+            variant: "default",
+          });
         }
       } else {
         toast({
@@ -156,11 +154,7 @@ const Keywords = () => {
     setAnalysis(null);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
       const { data, error } = await supabase.functions.invoke("analyze-keyword", {
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`
-        },
         body: { keyword: keyword.trim() },
       });
 

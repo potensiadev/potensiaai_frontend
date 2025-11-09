@@ -118,11 +118,7 @@ const Write = () => {
   const fetchRefinedTitles = async (inputTitle: string) => {
     try {
       setLoading(true);
-      const { data: { session } } = await supabase.auth.getSession();
       const { data, error } = await supabase.functions.invoke("refine-keyword", {
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`
-        },
         body: { keyword: inputTitle },
       });
 
@@ -149,11 +145,7 @@ const Write = () => {
       setGenerating(true);
       setValidationResult(null);
       
-      const { data: { session } } = await supabase.auth.getSession();
       const { data, error } = await supabase.functions.invoke("generate-content", {
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`
-        },
         body: { 
           keyword: title.trim(),
           length: contentLength,
@@ -165,8 +157,11 @@ const Write = () => {
 
       if (data.status === "success") {
         setGeneratedContent(data.data.content);
-        // 히스토리에 저장
-        await saveToHistory();
+        // 히스토리에 저장 (로그인된 사용자만)
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await saveToHistory();
+        }
       } else if (data.error) {
         alert(data.error);
       }
@@ -187,11 +182,7 @@ const Write = () => {
     try {
       setValidating(true);
       
-      const { data: { session } } = await supabase.auth.getSession();
       const { data, error } = await supabase.functions.invoke("validate-content", {
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`
-        },
         body: { 
           content: generatedContent,
           keyword: title.trim(),
@@ -226,11 +217,7 @@ const Write = () => {
       
       // Generate multiple thumbnails
       for (let i = 0; i < count; i++) {
-        const { data: { session } } = await supabase.auth.getSession();
         const { data, error } = await supabase.functions.invoke("generate-thumbnail", {
-          headers: {
-            Authorization: `Bearer ${session?.access_token}`
-          },
           body: { 
             title: title.trim(),
             content: generatedContent,
