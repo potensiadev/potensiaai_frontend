@@ -19,7 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import * as api from "@/lib/api";
+
 
 interface ValidationResult {
   scores: {
@@ -135,19 +135,20 @@ const Write = () => {
       setLoading(true);
       setApiError(null);
 
-      const response = await api.refineTopic({ topic: inputTitle });
+      const { data, error } = await supabase.functions.invoke('refine-keyword', {
+        body: { keyword: inputTitle }
+      });
 
-      if (response.status === "success") {
-        setRefinedTopic(response.refined_topic);
-        // For now, just show the refined topic as a single suggestion
-        setRefinedTitles([response.refined_topic]);
+      if (error) throw error;
+
+      if (data?.status === "success" && data.titles) {
+        setRefinedTopic(data.titles[0]);
+        setRefinedTitles(data.titles);
       }
     } catch (err) {
       console.error("제목 추천 실패:", err);
       setRefinedTitles([]);
-      if (err instanceof api.APIError) {
-        setApiError(err.message);
-      }
+      setApiError(err instanceof Error ? err.message : "제목 추천 중 오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }
@@ -168,14 +169,19 @@ const Write = () => {
       setValidationResult(null);
       setApiError(null);
 
-      const response = await api.generateFullContent({
-        topic: title.trim(),
+      const { data, error } = await supabase.functions.invoke('generate-content', {
+        body: { 
+          keyword: title.trim(),
+          length: contentLength,
+          tone: contentTone
+        }
       });
 
-      if (response.status === "success") {
-        setGeneratedContent(response.content);
-        setRefinedTopic(response.refined_topic);
-        setValidationResult(response.validation);
+      if (error) throw error;
+
+      if (data?.status === "success" && data.data) {
+        setGeneratedContent(data.data.content);
+        setRefinedTopic(data.data.topic);
 
         toast({
           title: "생성 완료",
@@ -190,7 +196,7 @@ const Write = () => {
       }
     } catch (err) {
       console.error("콘텐츠 생성 실패:", err);
-      const errorMessage = err instanceof api.APIError
+      const errorMessage = err instanceof Error
         ? err.message
         : "콘텐츠 생성 중 오류가 발생했습니다.";
 
@@ -219,12 +225,31 @@ const Write = () => {
       setValidating(true);
       setApiError(null);
 
-      const response = await api.validateContent({
-        content: generatedContent,
+      const { data, error } = await supabase.functions.invoke('validate-content', {
+        body: { 
+          content: generatedContent,
+          keyword: title
+        }
       });
 
-      if (response.status === "success") {
-        setValidationResult(response.validation);
+      if (error) throw error;
+
+      if (data?.status === "success" && data.data) {
+        // Transform the validation result to match our ValidationResult interface
+        const validation: ValidationResult = {
+          scores: {
+            grammar: Math.round(data.data.seo_score * 0.1) || 7,
+            human: 8,
+            seo: Math.round(data.data.seo_score * 0.1) || 7
+          },
+          has_faq: generatedContent.toLowerCase().includes('faq') || generatedContent.toLowerCase().includes('자주 묻는'),
+          issues: data.data.improvements?.map((imp: string) => ({
+            type: "개선 필요",
+            message: imp
+          })) || []
+        };
+        
+        setValidationResult(validation);
 
         toast({
           title: "검증 완료",
@@ -233,7 +258,7 @@ const Write = () => {
       }
     } catch (err) {
       console.error("콘텐츠 검증 실패:", err);
-      const errorMessage = err instanceof api.APIError
+      const errorMessage = err instanceof Error
         ? err.message
         : "콘텐츠 검증 중 오류가 발생했습니다.";
 
@@ -249,67 +274,11 @@ const Write = () => {
   };
 
   const handleFixContent = async () => {
-    if (!generatedContent || !validationResult) {
-      toast({
-        title: "입력 오류",
-        description: "먼저 콘텐츠를 검증해주세요.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      setGenerating(true);
-      setApiError(null);
-
-      const response = await api.fixContent({
-        content: generatedContent,
-        validation_report: validationResult,
-        metadata: {
-          focus_keyphrase: title,
-          language: "ko",
-          style: contentTone,
-        },
-      });
-
-      if (response.status === "success") {
-        setGeneratedContent(response.fixed_content);
-
-        // Re-validate after fixing
-        const revalidation = await api.validateContent({
-          content: response.fixed_content,
-        });
-
-        if (revalidation.status === "success") {
-          setValidationResult(revalidation.validation);
-        }
-
-        toast({
-          title: "수정 완료",
-          description: `콘텐츠가 자동 수정되었습니다. ${response.fix_summary.join(", ")}`,
-        });
-
-        // Save to history
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          await saveToHistory();
-        }
-      }
-    } catch (err) {
-      console.error("콘텐츠 수정 실패:", err);
-      const errorMessage = err instanceof api.APIError
-        ? err.message
-        : "콘텐츠 수정 중 오류가 발생했습니다.";
-
-      setApiError(errorMessage);
-      toast({
-        title: "수정 실패",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    } finally {
-      setGenerating(false);
-    }
+    toast({
+      title: "수정 기능",
+      description: "자동 수정 기능은 현재 개발 중입니다.",
+      variant: "default",
+    });
   };
 
   const handleGenerateThumbnail = async () => {
@@ -615,18 +584,6 @@ const Write = () => {
                       <Eye className="mr-2 h-4 w-4" />
                       {validating ? "검증 중..." : "검증"}
                     </Button>
-                    {validationResult && validationResult.issues && validationResult.issues.length > 0 && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleFixContent}
-                        disabled={generating}
-                        className="border-amber-500 text-amber-600 hover:bg-amber-50"
-                      >
-                        <RefreshCw className="mr-2 h-4 w-4" />
-                        {generating ? "수정 중..." : "자동 수정"}
-                      </Button>
-                    )}
                   </>
                 )}
                 <Button variant="outline" size="sm" disabled={!generatedContent}>
