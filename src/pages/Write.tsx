@@ -14,17 +14,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Sparkles, Send, Save, Eye, History, Trash2, Download, RefreshCw } from "lucide-react";
+import { Sparkles, Send, Save, Eye, History, Trash2, Download, RefreshCw, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import * as api from "@/lib/api";
 
 interface ValidationResult {
-  seo_score: number;
-  keyword_density: number;
-  readability: string;
-  improvements: string[];
-  strengths: string[];
+  scores: {
+    grammar: number;
+    human: number;
+    seo: number;
+  };
+  has_faq: boolean;
+  issues: Array<{
+    type: string;
+    message: string;
+  }>;
+  // Legacy support
+  grammar_score?: number;
+  human_score?: number;
+  seo_score?: number;
+  suggestions?: string[];
 }
 
 interface ContentHistory {
@@ -59,6 +71,8 @@ const Write = () => {
   const [contentHistory, setContentHistory] = useState<ContentHistory[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [refinedTopic, setRefinedTopic] = useState<string>("");
 
   // URL 파라미터에서 제목 불러오기
   useEffect(() => {
@@ -105,31 +119,35 @@ const Write = () => {
   useEffect(() => {
     if (!title || title.length < 2) {
       setRefinedTitles([]);
+      setRefinedTopic("");
       return;
     }
 
     const delay = setTimeout(() => {
-      fetchRefinedTitles(title);
+      fetchRefinedTitle(title);
     }, 600);
 
     return () => clearTimeout(delay);
   }, [title]);
 
-  const fetchRefinedTitles = async (inputTitle: string) => {
+  const fetchRefinedTitle = async (inputTitle: string) => {
     try {
       setLoading(true);
-      const { data, error } = await supabase.functions.invoke("refine-keyword", {
-        body: { keyword: inputTitle },
-      });
+      setApiError(null);
 
-      if (error) throw error;
+      const response = await api.refineTopic({ topic: inputTitle });
 
-      if (data.status === "success") {
-        setRefinedTitles(data.titles || []);
+      if (response.status === "success") {
+        setRefinedTopic(response.refined_topic);
+        // For now, just show the refined topic as a single suggestion
+        setRefinedTitles([response.refined_topic]);
       }
     } catch (err) {
-      console.error("추천 제목 API 호출 실패:", err);
+      console.error("제목 추천 실패:", err);
       setRefinedTitles([]);
+      if (err instanceof api.APIError) {
+        setApiError(err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -137,37 +155,51 @@ const Write = () => {
 
   const handleGenerateContent = async () => {
     if (!title || title.trim().length === 0) {
-      alert("제목을 입력해주세요.");
+      toast({
+        title: "입력 오류",
+        description: "제목을 입력해주세요.",
+        variant: "destructive",
+      });
       return;
     }
 
     try {
       setGenerating(true);
       setValidationResult(null);
-      
-      const { data, error } = await supabase.functions.invoke("generate-content", {
-        body: { 
-          keyword: title.trim(),
-          length: contentLength,
-          tone: contentTone,
-        },
+      setApiError(null);
+
+      const response = await api.generateFullContent({
+        topic: title.trim(),
       });
 
-      if (error) throw error;
+      if (response.status === "success") {
+        setGeneratedContent(response.content);
+        setRefinedTopic(response.refined_topic);
+        setValidationResult(response.validation);
 
-      if (data.status === "success") {
-        setGeneratedContent(data.data.content);
+        toast({
+          title: "생성 완료",
+          description: "AI가 콘텐츠를 성공적으로 생성했습니다.",
+        });
+
         // 히스토리에 저장 (로그인된 사용자만)
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           await saveToHistory();
         }
-      } else if (data.error) {
-        alert(data.error);
       }
     } catch (err) {
       console.error("콘텐츠 생성 실패:", err);
-      alert("콘텐츠 생성 중 오류가 발생했습니다. 다시 시도해주세요.");
+      const errorMessage = err instanceof api.APIError
+        ? err.message
+        : "콘텐츠 생성 중 오류가 발생했습니다.";
+
+      setApiError(errorMessage);
+      toast({
+        title: "생성 실패",
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       setGenerating(false);
     }
@@ -175,32 +207,108 @@ const Write = () => {
 
   const handleValidateContent = async () => {
     if (!generatedContent || generatedContent.trim().length === 0) {
-      alert("먼저 콘텐츠를 생성해주세요.");
+      toast({
+        title: "입력 오류",
+        description: "먼저 콘텐츠를 생성해주세요.",
+        variant: "destructive",
+      });
       return;
     }
 
     try {
       setValidating(true);
-      
-      const { data, error } = await supabase.functions.invoke("validate-content", {
-        body: { 
-          content: generatedContent,
-          keyword: title.trim(),
-        },
+      setApiError(null);
+
+      const response = await api.validateContent({
+        content: generatedContent,
       });
 
-      if (error) throw error;
+      if (response.status === "success") {
+        setValidationResult(response.validation);
 
-      if (data.status === "success") {
-        setValidationResult(data.data);
-      } else if (data.error) {
-        alert(data.error);
+        toast({
+          title: "검증 완료",
+          description: "콘텐츠 품질 분석이 완료되었습니다.",
+        });
       }
     } catch (err) {
       console.error("콘텐츠 검증 실패:", err);
-      alert("콘텐츠 검증 중 오류가 발생했습니다. 다시 시도해주세요.");
+      const errorMessage = err instanceof api.APIError
+        ? err.message
+        : "콘텐츠 검증 중 오류가 발생했습니다.";
+
+      setApiError(errorMessage);
+      toast({
+        title: "검증 실패",
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       setValidating(false);
+    }
+  };
+
+  const handleFixContent = async () => {
+    if (!generatedContent || !validationResult) {
+      toast({
+        title: "입력 오류",
+        description: "먼저 콘텐츠를 검증해주세요.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setGenerating(true);
+      setApiError(null);
+
+      const response = await api.fixContent({
+        content: generatedContent,
+        validation_report: validationResult,
+        metadata: {
+          focus_keyphrase: title,
+          language: "ko",
+          style: contentTone,
+        },
+      });
+
+      if (response.status === "success") {
+        setGeneratedContent(response.fixed_content);
+
+        // Re-validate after fixing
+        const revalidation = await api.validateContent({
+          content: response.fixed_content,
+        });
+
+        if (revalidation.status === "success") {
+          setValidationResult(revalidation.validation);
+        }
+
+        toast({
+          title: "수정 완료",
+          description: `콘텐츠가 자동 수정되었습니다. ${response.fix_summary.join(", ")}`,
+        });
+
+        // Save to history
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          await saveToHistory();
+        }
+      }
+    } catch (err) {
+      console.error("콘텐츠 수정 실패:", err);
+      const errorMessage = err instanceof api.APIError
+        ? err.message
+        : "콘텐츠 수정 중 오류가 발생했습니다.";
+
+      setApiError(errorMessage);
+      toast({
+        title: "수정 실패",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setGenerating(false);
     }
   };
 
@@ -386,6 +494,14 @@ const Write = () => {
           </div>
         </div>
 
+        {/* API Error Alert */}
+        {apiError && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{apiError}</AlertDescription>
+          </Alert>
+        )}
+
         <div className="grid gap-6 lg:grid-cols-12">
           {/* Main Content Area */}
           <div className="lg:col-span-9 space-y-6">
@@ -489,15 +605,29 @@ const Write = () => {
               </div>
               <div className="flex gap-2">
                 {generatedContent && (
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={handleValidateContent}
-                    disabled={validating}
-                  >
-                    <Eye className="mr-2 h-4 w-4" />
-                    {validating ? "검증 중..." : "검증"}
-                  </Button>
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleValidateContent}
+                      disabled={validating}
+                    >
+                      <Eye className="mr-2 h-4 w-4" />
+                      {validating ? "검증 중..." : "검증"}
+                    </Button>
+                    {validationResult && validationResult.issues && validationResult.issues.length > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleFixContent}
+                        disabled={generating}
+                        className="border-amber-500 text-amber-600 hover:bg-amber-50"
+                      >
+                        <RefreshCw className="mr-2 h-4 w-4" />
+                        {generating ? "수정 중..." : "자동 수정"}
+                      </Button>
+                    )}
+                  </>
                 )}
                 <Button variant="outline" size="sm" disabled={!generatedContent}>
                   <Save className="mr-2 h-4 w-4" />
@@ -555,46 +685,61 @@ const Write = () => {
               <div className="mt-6 space-y-4">
                 <div className="grid grid-cols-3 gap-4 rounded-lg bg-muted/50 p-4">
                   <div>
-                    <p className="text-xs text-muted-foreground">SEO 점수</p>
+                    <p className="text-xs text-muted-foreground">문법 점수</p>
                     <p className="mt-1 text-2xl font-bold text-success">
-                      {validationResult.seo_score}
+                      {validationResult.scores?.grammar || validationResult.grammar_score || 0}/10
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">키워드 밀도</p>
+                    <p className="text-xs text-muted-foreground">인간다움</p>
                     <p className="mt-1 text-2xl font-bold text-primary">
-                      {validationResult.keyword_density}%
+                      {validationResult.scores?.human || validationResult.human_score || 0}/10
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">가독성</p>
+                    <p className="text-xs text-muted-foreground">SEO 점수</p>
                     <p className="mt-1 text-2xl font-bold text-secondary">
-                      {validationResult.readability}
+                      {validationResult.scores?.seo || validationResult.seo_score || 0}/10
                     </p>
                   </div>
                 </div>
 
                 {/* Validation Details */}
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-4">
                   <div className="rounded-lg border border-border bg-card p-4">
-                    <h4 className="mb-3 font-semibold text-foreground">✨ 강점</h4>
-                    <ul className="space-y-2">
-                      {validationResult.strengths.map((strength, i) => (
-                        <li key={i} className="text-sm text-muted-foreground">
-                          • {strength}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                  <div className="rounded-lg border border-border bg-card p-4">
-                    <h4 className="mb-3 font-semibold text-foreground">💡 개선 사항</h4>
-                    <ul className="space-y-2">
-                      {validationResult.improvements.map((improvement, i) => (
-                        <li key={i} className="text-sm text-muted-foreground">
-                          • {improvement}
-                        </li>
-                      ))}
-                    </ul>
+                    <div className="flex items-center gap-2 mb-3">
+                      <h4 className="font-semibold text-foreground">📋 분석 결과</h4>
+                      {validationResult.has_faq && (
+                        <Badge variant="secondary" className="text-xs">
+                          FAQ 포함
+                        </Badge>
+                      )}
+                    </div>
+
+                    {validationResult.issues && validationResult.issues.length > 0 ? (
+                      <ul className="space-y-2">
+                        {validationResult.issues.map((issue, i) => (
+                          <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                            <span className="text-amber-500 mt-0.5">•</span>
+                            <div>
+                              <span className="font-medium text-foreground">{issue.type}:</span> {issue.message}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : validationResult.suggestions && validationResult.suggestions.length > 0 ? (
+                      <ul className="space-y-2">
+                        {validationResult.suggestions.map((suggestion, i) => (
+                          <li key={i} className="text-sm text-muted-foreground">
+                            • {suggestion}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm text-green-600">
+                        ✅ 모든 품질 검사를 통과했습니다!
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
