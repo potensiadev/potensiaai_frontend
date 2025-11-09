@@ -45,6 +45,8 @@ const Write = () => {
   const [contentTone, setContentTone] = useState("professional");
   const [generatedContent, setGeneratedContent] = useState("");
   const [thumbnailImage, setThumbnailImage] = useState("");
+  const [thumbnailSize, setThumbnailSize] = useState("1024x1024");
+  const [thumbnailStyle, setThumbnailStyle] = useState("modern");
   const [refinedTitles, setRefinedTitles] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [generating, setGenerating] = useState(false);
@@ -209,6 +211,8 @@ const Write = () => {
         body: { 
           title: title.trim(),
           content: generatedContent,
+          size: thumbnailSize,
+          style: thumbnailStyle,
         },
       });
 
@@ -440,26 +444,15 @@ const Write = () => {
               </div>
               <div className="flex gap-2">
                 {generatedContent && (
-                  <>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={handleValidateContent}
-                      disabled={validating}
-                    >
-                      <Eye className="mr-2 h-4 w-4" />
-                      {validating ? "검증 중..." : "검증"}
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={handleGenerateThumbnail}
-                      disabled={generatingThumbnail}
-                    >
-                      <Sparkles className="mr-2 h-4 w-4" />
-                      {generatingThumbnail ? "생성 중..." : "썸네일 생성"}
-                    </Button>
-                  </>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleValidateContent}
+                    disabled={validating}
+                  >
+                    <Eye className="mr-2 h-4 w-4" />
+                    {validating ? "검증 중..." : "검증"}
+                  </Button>
                 )}
                 <Button variant="outline" size="sm" disabled={!generatedContent}>
                   <Save className="mr-2 h-4 w-4" />
@@ -488,16 +481,6 @@ const Write = () => {
               </div>
             ) : generatedContent ? (
               <div className="space-y-4">
-                {thumbnailImage && (
-                  <div className="rounded-lg border border-border bg-card p-4">
-                    <h4 className="mb-3 font-semibold text-foreground">🖼️ 생성된 썸네일</h4>
-                    <img 
-                      src={thumbnailImage} 
-                      alt="Generated thumbnail" 
-                      className="w-full rounded-lg"
-                    />
-                  </div>
-                )}
                 <Textarea
                   value={generatedContent}
                   onChange={(e) => setGeneratedContent(e.target.value)}
@@ -572,6 +555,67 @@ const Write = () => {
               </div>
             )}
           </Card>
+
+          {/* Thumbnail Generator */}
+          {generatedContent && (
+            <Card className="p-6 shadow-md">
+              <h3 className="text-lg font-semibold text-foreground mb-4">
+                🖼️ 썸네일 생성
+              </h3>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="thumbnail-size">이미지 사이즈</Label>
+                    <Select value={thumbnailSize} onValueChange={setThumbnailSize}>
+                      <SelectTrigger id="thumbnail-size">
+                        <SelectValue placeholder="사이즈 선택" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1024x1024">정사각형 (1024x1024)</SelectItem>
+                        <SelectItem value="1792x1024">가로형 (1792x1024)</SelectItem>
+                        <SelectItem value="1024x1792">세로형 (1024x1792)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="thumbnail-style">썸네일 스타일</Label>
+                    <Select value={thumbnailStyle} onValueChange={setThumbnailStyle}>
+                      <SelectTrigger id="thumbnail-style">
+                        <SelectValue placeholder="스타일 선택" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="minimal">미니멀</SelectItem>
+                        <SelectItem value="modern">모던</SelectItem>
+                        <SelectItem value="vibrant">비비드</SelectItem>
+                        <SelectItem value="elegant">우아함</SelectItem>
+                        <SelectItem value="playful">재미있는</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <Button
+                  onClick={handleGenerateThumbnail}
+                  disabled={generatingThumbnail}
+                  className="w-full bg-gradient-primary"
+                >
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  {generatingThumbnail ? "썸네일 생성 중..." : "썸네일 생성"}
+                </Button>
+
+                {thumbnailImage && (
+                  <div className="rounded-lg border border-border bg-card p-4">
+                    <img 
+                      src={thumbnailImage} 
+                      alt="Generated thumbnail" 
+                      className="w-full rounded-lg"
+                    />
+                  </div>
+                )}
+              </div>
+            </Card>
+          )}
         </div>
 
         {/* History Sidebar */}

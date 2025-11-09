@@ -11,7 +11,7 @@ serve(async (req) => {
   }
 
   try {
-    const { title, content } = await req.json();
+    const { title, content, size = "1024x1024", style = "modern" } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     if (!LOVABLE_API_KEY) {
@@ -20,19 +20,30 @@ serve(async (req) => {
 
     console.log("Starting thumbnail generation for:", title);
 
+    // 스타일별 설명
+    const styleDescriptions: Record<string, string> = {
+      minimal: "minimalist design, simple, clean lines, lots of white space",
+      modern: "modern design, sleek, professional, contemporary",
+      vibrant: "vibrant colors, energetic, bold, eye-catching",
+      elegant: "elegant design, sophisticated, refined, premium feel",
+      playful: "playful design, fun, creative, dynamic colors",
+    };
+
     // 콘텐츠에서 핵심 키워드 추출을 위한 프롬프트
     const extractPrompt = `다음 블로그 콘텐츠의 핵심 주제와 분위기를 파악하여, 썸네일 이미지 생성을 위한 간단한 설명을 영어로 작성해주세요.
 
 제목: ${title}
 콘텐츠: ${content.substring(0, 500)}...
+스타일: ${styleDescriptions[style] || styleDescriptions.modern}
 
 요구사항:
 - 30단어 이내의 영어 설명
 - 시각적으로 표현 가능한 요소 포함
 - 블로그 썸네일에 적합한 구도
-- 전문적이고 깔끔한 느낌
+- 지정된 스타일을 반영
+- 이미지 비율: ${size}
 
-예시 형식: "Professional blog thumbnail featuring [main topic], modern design, clean background, high quality"`;
+예시 형식: "Professional blog thumbnail featuring [main topic], ${styleDescriptions[style]}, ${size} aspect ratio, high quality"`;
 
     // Step 1: 이미지 프롬프트 생성
     const promptResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
