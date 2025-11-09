@@ -111,6 +111,18 @@ const Keywords = () => {
 
       if (data.status === "success") {
         setRefinedTitles(data.titles);
+        
+        // Save SEO titles to history
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const titlesToSave = data.titles.map((title: string) => ({
+            user_id: user.id,
+            keyword: kw,
+            seo_title: title,
+          }));
+          
+          await supabase.from("seo_titles_history").insert(titlesToSave);
+        }
       } else {
         toast({
           title: "오류",

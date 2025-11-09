@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -13,9 +13,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Sparkles, Download, RefreshCw, Eye, Image as ImageIcon } from "lucide-react";
+import { Sparkles, Download, RefreshCw, Eye, Image as ImageIcon, History, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+
+interface ContentHistory {
+  id: string;
+  title: string;
+  created_at: string;
+}
+
+interface SeoTitleHistory {
+  id: string;
+  keyword: string;
+  seo_title: string;
+  created_at: string;
+}
 
 const Thumbnails = () => {
   const { toast } = useToast();
@@ -28,6 +43,61 @@ const Thumbnails = () => {
   const [thumbnailCount, setThumbnailCount] = useState("1");
   const [showPreview, setShowPreview] = useState(false);
   const [generatingThumbnail, setGeneratingThumbnail] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [contentHistory, setContentHistory] = useState<ContentHistory[]>([]);
+  const [seoTitleHistory, setSeoTitleHistory] = useState<SeoTitleHistory[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+
+  // Load history on mount
+  useEffect(() => {
+    fetchHistory();
+  }, []);
+
+  const fetchHistory = async () => {
+    try {
+      setLoadingHistory(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        return;
+      }
+
+      // Fetch content history
+      const { data: contentData, error: contentError } = await supabase
+        .from("content_history")
+        .select("id, title, created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+
+      if (contentError) throw contentError;
+      setContentHistory(contentData || []);
+
+      // Fetch SEO titles history
+      const { data: seoData, error: seoError } = await supabase
+        .from("seo_titles_history")
+        .select("id, keyword, seo_title, created_at")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+
+      if (seoError) throw seoError;
+      setSeoTitleHistory(seoData || []);
+    } catch (err) {
+      console.error("히스토리 불러오기 실패:", err);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
+  const handleSelectTitle = (selectedTitle: string) => {
+    setTitle(selectedTitle);
+    setShowHistory(false);
+    toast({
+      title: "제목 선택됨",
+      description: "선택한 제목이 입력되었습니다.",
+    });
+  };
 
   const handleGenerateThumbnail = async () => {
     if (!title.trim()) {
@@ -134,15 +204,25 @@ const Thumbnails = () => {
               제목과 내용을 입력하고 AI가 전문적인 썸네일을 생성합니다
             </p>
           </div>
-          <Badge variant="secondary" className="bg-gradient-primary text-white">
-            <Sparkles className="mr-1 h-3 w-3" />
-            AI 기반
-          </Badge>
+          <div className="flex gap-2 items-center">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowHistory(!showHistory)}
+            >
+              <History className="mr-2 h-4 w-4" />
+              히스토리
+            </Button>
+            <Badge variant="secondary" className="bg-gradient-primary text-white">
+              <Sparkles className="mr-1 h-3 w-3" />
+              AI 기반
+            </Badge>
+          </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-12">
           {/* Settings Panel */}
-          <div className="space-y-6">
+          <div className={`space-y-6 ${showHistory ? "lg:col-span-5" : "lg:col-span-6"}`}>
             <Card className="p-6 shadow-md">
               <h3 className="mb-4 text-lg font-semibold text-foreground">
                 콘텐츠 정보
@@ -271,7 +351,7 @@ const Thumbnails = () => {
           </div>
 
           {/* Preview Panel */}
-          <div className="space-y-6">
+          <div className={`space-y-6 ${showHistory ? "lg:col-span-4" : "lg:col-span-6"}`}>
             <Card className="p-6 shadow-md min-h-[400px]">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-foreground">
@@ -378,6 +458,108 @@ const Thumbnails = () => {
               )}
             </Card>
           </div>
+
+          {/* History Sidebar */}
+          {showHistory && (
+            <div className="lg:col-span-3">
+              <Card className="p-4 shadow-md h-full">
+                <h3 className="mb-4 text-lg font-semibold text-foreground flex items-center gap-2">
+                  <History className="h-5 w-5" />
+                  제목 히스토리
+                </h3>
+                
+                {loadingHistory ? (
+                  <div className="text-center py-8">
+                    <p className="text-sm text-muted-foreground">불러오는 중...</p>
+                  </div>
+                ) : (
+                  <Tabs defaultValue="content" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="content">
+                        <FileText className="mr-2 h-4 w-4" />
+                        AI 글쓰기
+                      </TabsTrigger>
+                      <TabsTrigger value="seo">
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        키워드 리서치
+                      </TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="content" className="mt-4">
+                      {contentHistory.length === 0 ? (
+                        <div className="text-center py-8">
+                          <p className="text-sm text-muted-foreground">
+                            생성된 콘텐츠가 없습니다.
+                          </p>
+                        </div>
+                      ) : (
+                        <ScrollArea className="h-[calc(100vh-320px)]">
+                          <div className="space-y-2">
+                            {contentHistory.map((history) => (
+                              <div
+                                key={history.id}
+                                className="group relative rounded-lg border border-border bg-card p-3 transition-colors hover:bg-accent cursor-pointer"
+                                onClick={() => handleSelectTitle(history.title)}
+                              >
+                                <h4 className="font-medium text-sm text-foreground line-clamp-2 mb-1">
+                                  {history.title}
+                                </h4>
+                                <p className="text-xs text-muted-foreground">
+                                  {new Date(history.created_at).toLocaleDateString('ko-KR', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </ScrollArea>
+                      )}
+                    </TabsContent>
+                    
+                    <TabsContent value="seo" className="mt-4">
+                      {seoTitleHistory.length === 0 ? (
+                        <div className="text-center py-8">
+                          <p className="text-sm text-muted-foreground">
+                            생성된 SEO 제목이 없습니다.
+                          </p>
+                        </div>
+                      ) : (
+                        <ScrollArea className="h-[calc(100vh-320px)]">
+                          <div className="space-y-2">
+                            {seoTitleHistory.map((history) => (
+                              <div
+                                key={history.id}
+                                className="group relative rounded-lg border border-border bg-card p-3 transition-colors hover:bg-accent cursor-pointer"
+                                onClick={() => handleSelectTitle(history.seo_title)}
+                              >
+                                <Badge variant="outline" className="text-xs mb-2">
+                                  {history.keyword}
+                                </Badge>
+                                <h4 className="font-medium text-sm text-foreground line-clamp-2 mb-1">
+                                  {history.seo_title}
+                                </h4>
+                                <p className="text-xs text-muted-foreground">
+                                  {new Date(history.created_at).toLocaleDateString('ko-KR', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                  })}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </ScrollArea>
+                      )}
+                    </TabsContent>
+                  </Tabs>
+                )}
+              </Card>
+            </div>
+          )}
         </div>
       </div>
     </Layout>
