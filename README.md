@@ -50,6 +50,60 @@ npm run dev
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
+## Backend API Configuration
+
+This frontend requires a FastAPI backend to be running. You have two options:
+
+### Option 1: Local Development (Recommended)
+
+1. Clone the backend repository:
+```sh
+git clone https://github.com/potensiadev/potensia_ai.git
+cd potensia_ai
+```
+
+2. Set up Python environment and install dependencies:
+```sh
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+3. Configure your `.env` file with required API keys (OpenAI, etc.)
+
+4. Start the backend server:
+```sh
+python main.py
+# Server will run on http://localhost:8000
+```
+
+5. Update your frontend `.env` file:
+```env
+VITE_API_BASE_URL="http://localhost:8000"
+```
+
+### Option 2: Railway Production
+
+If you have deployed the backend to Railway:
+
+1. Get your Railway deployment URL
+2. Update the `.env` file:
+```env
+VITE_API_BASE_URL="https://your-app.up.railway.app"
+```
+
+### Testing the API Connection
+
+After starting the backend, you can test the connection:
+```sh
+curl http://localhost:8000/api/health
+```
+
+Expected response:
+```json
+{"status":"ok","app":"PotensiaAI","env":"development"}
+```
+
 ## What technologies are used for this project?
 
 This project is built with:
@@ -59,6 +113,7 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+- FastAPI Backend (Python)
 
 ## How can I deploy this project?
 

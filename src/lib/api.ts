@@ -1,7 +1,11 @@
-// API Client for Railway FastAPI Backend
-// Base URL: https://potensiaai-production.up.railway.app
+// API Client for FastAPI Backend
+// Supports both Railway (production) and localhost (development)
 
-const API_BASE_URL = "https://potensiaai-production.up.railway.app";
+// Get API base URL from environment variable or use default
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+
+// Log the API URL being used (helpful for debugging)
+console.log(`[API Client] Using base URL: ${API_BASE_URL}`);
 
 // Type definitions matching backend responses
 export interface WriteRequest {
@@ -104,20 +108,34 @@ async function apiFetch<T>(
   };
 
   try {
+    console.log(`[API] Fetching: ${url}`);
     const response = await fetch(url, config);
 
     // Parse response
-    const data = await response.json();
+    let data;
+    try {
+      data = await response.json();
+    } catch (parseError) {
+      // If response is not JSON, create a generic error object
+      data = {
+        detail: `Invalid JSON response from server (status: ${response.status})`,
+        raw: await response.text().catch(() => "Unable to read response")
+      };
+    }
 
     // Check for HTTP errors
     if (!response.ok) {
+      const errorMessage = data.detail || data.message || `API request failed with status ${response.status}`;
+      console.error(`[API Error] ${response.status}: ${errorMessage}`, data);
+
       throw new APIError(
-        data.detail || data.message || `API request failed with status ${response.status}`,
+        errorMessage,
         response.status,
         data
       );
     }
 
+    console.log(`[API] Success: ${endpoint}`);
     return data as T;
   } catch (error) {
     if (error instanceof APIError) {
@@ -126,7 +144,8 @@ async function apiFetch<T>(
 
     // Network or parsing errors
     if (error instanceof Error) {
-      throw new APIError(`Network error: ${error.message}`);
+      console.error(`[API Network Error]:`, error);
+      throw new APIError(`Network error: ${error.message}. Please check if the backend server is running at ${API_BASE_URL}`);
     }
 
     throw new APIError("Unknown error occurred");
