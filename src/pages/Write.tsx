@@ -773,77 +773,77 @@ const Write = () => {
           )}
         </div>
 
-        {/* History Sidebar */}
-        {showHistory && (
-          <div className="lg:col-span-3">
-            <Card className="p-4 shadow-md h-full">
-              <h3 className="mb-4 text-lg font-semibold text-foreground flex items-center gap-2">
-                <History className="h-5 w-5" />
-                콘텐츠 히스토리
-              </h3>
-              
-              {loadingHistory ? (
-                <div className="text-center py-8">
-                  <p className="text-sm text-muted-foreground">불러오는 중...</p>
-                </div>
-              ) : contentHistory.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-sm text-muted-foreground">
-                    아직 생성된 콘텐츠가 없습니다.
-                  </p>
-                </div>
-              ) : (
-                <ScrollArea className="h-[calc(100vh-250px)]">
-                  <div className="space-y-3">
-                    {contentHistory.map((history) => (
-                      <div
-                        key={history.id}
-                        className="group relative rounded-lg border border-border bg-card p-3 transition-colors hover:bg-accent cursor-pointer"
-                        onClick={() => loadFromHistory(history)}
-                      >
-                        <div className="pr-8">
-                          <h4 className="font-medium text-sm text-foreground line-clamp-2 mb-1">
-                            {history.title}
-                          </h4>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <Badge variant="outline" className="text-xs">
-                              {history.content_length === "short" ? "짧게" : 
-                               history.content_length === "medium" ? "보통" : "길게"}
-                            </Badge>
-                            <Badge variant="outline" className="text-xs">
-                              {history.content_tone === "professional" ? "전문적" :
-                               history.content_tone === "friendly" ? "친근한" : "설득적"}
-                            </Badge>
-                          </div>
-                          <p className="mt-2 text-xs text-muted-foreground">
-                            {new Date(history.created_at).toLocaleDateString('ko-KR', {
-                              month: 'short',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit'
-                            })}
-                          </p>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteFromHistory(history.id);
-                          }}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    ))}
+          {/* History Sidebar */}
+          {showHistory && (
+            <div className="lg:col-span-3">
+              <Card className="p-4 shadow-md h-full">
+                <h3 className="mb-4 text-lg font-semibold text-foreground flex items-center gap-2">
+                  <History className="h-5 w-5" />
+                  콘텐츠 히스토리
+                </h3>
+                
+                {loadingHistory ? (
+                  <div className="text-center py-8">
+                    <p className="text-sm text-muted-foreground">불러오는 중...</p>
                   </div>
-                </ScrollArea>
-              )}
-            </Card>
-          </div>
-        )}
-      </div>
+                ) : contentHistory.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-sm text-muted-foreground">
+                      아직 생성된 콘텐츠가 없습니다.
+                    </p>
+                  </div>
+                ) : (
+                  <ScrollArea className="h-[calc(100vh-250px)]">
+                    <div className="space-y-3">
+                      {contentHistory.map((history) => (
+                        <div
+                          key={history.id}
+                          className="group relative rounded-lg border border-border bg-card p-3 transition-colors hover:bg-accent cursor-pointer"
+                          onClick={() => loadFromHistory(history)}
+                        >
+                          <div className="pr-8">
+                            <h4 className="font-medium text-sm text-foreground line-clamp-2 mb-1">
+                              {history.title}
+                            </h4>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <Badge variant="outline" className="text-xs">
+                                {history.content_length === "short" ? "짧게" : 
+                                 history.content_length === "medium" ? "보통" : "길게"}
+                              </Badge>
+                              <Badge variant="outline" className="text-xs">
+                                {history.content_tone === "professional" ? "전문적" :
+                                 history.content_tone === "friendly" ? "친근한" : "설득적"}
+                              </Badge>
+                            </div>
+                            <p className="mt-2 text-xs text-muted-foreground">
+                              {new Date(history.created_at).toLocaleDateString('ko-KR', {
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteFromHistory(history.id);
+                            }}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                )}
+              </Card>
+            </div>
+          )}
+        </div>
       </div>
     </Layout>
   );
