@@ -8,8 +8,33 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 export const Header = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      toast({
+        title: "로그아웃 완료",
+        description: "안전하게 로그아웃되었습니다.",
+      });
+      
+      navigate("/auth");
+    } catch (error: any) {
+      toast({
+        title: "로그아웃 실패",
+        description: error.message || "로그아웃 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    }
+  };
   return (
     <header className="fixed left-64 right-0 top-0 z-30 h-16 border-b border-border bg-card/80 backdrop-blur-md">
       <div className="flex h-full items-center justify-between px-8">
@@ -38,7 +63,7 @@ export const Header = () => {
               <DropdownMenuItem>플랜 및 결제</DropdownMenuItem>
               <DropdownMenuItem>팀 설정</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>로그아웃</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout}>로그아웃</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
