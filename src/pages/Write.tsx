@@ -142,7 +142,9 @@ const Write = () => {
       setLoading(true);
       setApiError(null);
 
+      console.log("Refining topic:", inputTitle);
       const response = await refineTopic({ topic: inputTitle });
+      console.log("Refine response:", response);
       
       if (response.refined_topic) {
         setRefinedTopic(response.refined_topic);
@@ -152,9 +154,20 @@ const Write = () => {
       console.error("제목 추천 실패:", err);
       setRefinedTitles([]);
       if (err instanceof APIError) {
-        setApiError(`제목 개선 실패: ${err.message}`);
+        setApiError(err.message);
+        toast({
+          title: "제목 개선 실패",
+          description: err.message,
+          variant: "destructive",
+        });
       } else {
-        setApiError("제목 추천 중 오류가 발생했습니다. 네트워크 연결을 확인해주세요.");
+        const message = "제목 추천 중 오류가 발생했습니다.";
+        setApiError(message);
+        toast({
+          title: "오류",
+          description: message,
+          variant: "destructive",
+        });
       }
     } finally {
       setLoading(false);

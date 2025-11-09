@@ -84,10 +84,11 @@ export class APIError extends Error {
   }
 }
 
-// Base fetch wrapper with error handling
+// Base fetch wrapper with error handling with retry logic
 async function apiFetch<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  retries = 3
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
 
@@ -101,36 +102,73 @@ async function apiFetch<T>(
       ...defaultHeaders,
       ...options.headers,
     },
+    mode: 'cors',
   };
 
-  try {
-    const response = await fetch(url, config);
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      console.log(`Attempting API call to ${url} (attempt ${attempt + 1}/${retries + 1})`);
+      
+      const response = await fetch(url, config);
 
-    // Parse response
-    const data = await response.json();
+      console.log(`Response status: ${response.status}`);
 
-    // Check for HTTP errors
-    if (!response.ok) {
-      throw new APIError(
-        data.detail || data.message || `API request failed with status ${response.status}`,
-        response.status,
-        data
-      );
+      // Try to parse response
+      let data;
+      const contentType = response.headers.get("content-type");
+      
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        console.error("Non-JSON response:", text);
+        throw new APIError(
+          `서버가 올바르지 않은 응답을 반환했습니다. Railway 앱이 제대로 실행 중인지 확인해주세요.`,
+          response.status,
+          { raw: text }
+        );
+      }
+
+      // Check for HTTP errors
+      if (!response.ok) {
+        throw new APIError(
+          data.detail || data.message || `API 요청 실패 (상태 코드: ${response.status})`,
+          response.status,
+          data
+        );
+      }
+
+      return data as T;
+    } catch (error) {
+      if (error instanceof APIError) {
+        throw error;
+      }
+
+      // Network or CORS errors
+      if (error instanceof TypeError && error.message.includes("Failed to fetch")) {
+        if (attempt < retries) {
+          const delay = Math.pow(2, attempt) * 1000; // Exponential backoff
+          console.log(`Retrying after ${delay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
+        }
+        throw new APIError(
+          `Railway API 서버에 연결할 수 없습니다. 서버 상태를 확인해주세요.\n- Railway 앱이 실행 중인지 확인\n- CORS가 올바르게 설정되었는지 확인\n- URL이 올바른지 확인: ${API_BASE_URL}`,
+          undefined,
+          { originalError: error.message }
+        );
+      }
+
+      // Parsing or other errors
+      if (error instanceof Error) {
+        throw new APIError(`오류: ${error.message}`, undefined, { originalError: error.message });
+      }
+
+      throw new APIError("알 수 없는 오류가 발생했습니다");
     }
-
-    return data as T;
-  } catch (error) {
-    if (error instanceof APIError) {
-      throw error;
-    }
-
-    // Network or parsing errors
-    if (error instanceof Error) {
-      throw new APIError(`Network error: ${error.message}`);
-    }
-
-    throw new APIError("Unknown error occurred");
   }
+
+  throw new APIError("최대 재시도 횟수를 초과했습니다");
 }
 
 /**
@@ -187,12 +225,20 @@ export async function fixContent(
 
 /**
  * Health check
- * GET /api/health
+ * GET /api/health or /api/write/health
  */
-export async function healthCheck(): Promise<{ status: string; app: string; env: string }> {
-  return apiFetch("/api/health", {
-    method: "GET",
-  });
+export async function healthCheck(): Promise<{ status: string; service?: string; app?: string; env?: string; timestamp?: string }> {
+  try {
+    // Try the write health endpoint first
+    return await apiFetch("/api/write/health", {
+      method: "GET",
+    }, 1); // Only 1 retry for health check
+  } catch (error) {
+    // Fallback to general health endpoint
+    return apiFetch("/api/health", {
+      method: "GET",
+    }, 1);
+  }
 }
 
 // Export all functions as a single API object for convenience
