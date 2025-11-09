@@ -195,25 +195,62 @@ const Write = () => {
           </Badge>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="space-y-6">
           {/* Settings Panel */}
-          <Card className="p-6 shadow-md lg:col-span-1">
-            <h3 className="mb-6 text-lg font-semibold text-foreground">
+          <Card className="p-6 shadow-md">
+            <h3 className="mb-4 text-lg font-semibold text-foreground">
               생성 설정
             </h3>
 
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="title">제목</Label>
-                <Input
-                  id="title"
-                  placeholder="글 제목을 입력하세요"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                />
-                <p className="text-xs text-muted-foreground">
-                  SEO 최적화된 제목
-                </p>
+            <div className="space-y-4">
+              <div className="flex gap-4 items-end">
+                <div className="flex-1 space-y-2">
+                  <Label htmlFor="title">제목</Label>
+                  <Input
+                    id="title"
+                    placeholder="글 제목을 입력하세요"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                  />
+                </div>
+
+                <div className="w-48 space-y-2">
+                  <Label htmlFor="content-length">글 길이</Label>
+                  <Select value={contentLength} onValueChange={setContentLength}>
+                    <SelectTrigger id="content-length">
+                      <SelectValue placeholder="길이 선택" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="short">짧게 (500-800자)</SelectItem>
+                      <SelectItem value="medium">보통 (1000-1500자)</SelectItem>
+                      <SelectItem value="long">길게 (2000-3000자)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="w-48 space-y-2">
+                  <Label htmlFor="content-tone">글 톤</Label>
+                  <Select value={contentTone} onValueChange={setContentTone}>
+                    <SelectTrigger id="content-tone">
+                      <SelectValue placeholder="톤 선택" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="professional">전문적</SelectItem>
+                      <SelectItem value="friendly">친근한</SelectItem>
+                      <SelectItem value="persuasive">설득적</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <Button
+                  className="bg-gradient-primary shadow-glow"
+                  size="lg"
+                  onClick={handleGenerateContent}
+                  disabled={generating || !title.trim()}
+                >
+                  <Sparkles className="mr-2 h-5 w-5" />
+                  {generating ? "생성 중..." : "콘텐츠 생성"}
+                </Button>
               </div>
 
               {/* Refined Title Suggestions */}
@@ -228,7 +265,7 @@ const Write = () => {
                   <h4 className="mb-3 text-sm font-semibold text-foreground">
                     ✨ 추천 제목 Top 10
                   </h4>
-                  <div className="grid grid-cols-1 gap-3">
+                  <div className="grid grid-cols-2 gap-3">
                     {refinedTitles.map((refinedTitle, i) => (
                       <div
                         key={i}
@@ -241,93 +278,11 @@ const Write = () => {
                   </div>
                 </div>
               )}
-
-              <div className="space-y-2">
-                <Label htmlFor="content-length">글 길이</Label>
-                <Select value={contentLength} onValueChange={setContentLength}>
-                  <SelectTrigger id="content-length">
-                    <SelectValue placeholder="길이 선택" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="short">짧게 (500-800자)</SelectItem>
-                    <SelectItem value="medium">보통 (1000-1500자)</SelectItem>
-                    <SelectItem value="long">길게 (2000-3000자)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="content-tone">글 톤</Label>
-                <Select value={contentTone} onValueChange={setContentTone}>
-                  <SelectTrigger id="content-tone">
-                    <SelectValue placeholder="톤 선택" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="professional">전문적</SelectItem>
-                    <SelectItem value="friendly">친근한</SelectItem>
-                    <SelectItem value="persuasive">설득적</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* <div className="space-y-2">
-                <Label htmlFor="content-type">글 유형</Label>
-                <Select value={contentType} onValueChange={setContentType}>
-                  <SelectTrigger id="content-type">
-                    <SelectValue placeholder="유형 선택" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="informative">정보형</SelectItem>
-                    <SelectItem value="experience">경험형</SelectItem>
-                    <SelectItem value="review">리뷰형</SelectItem>
-                    <SelectItem value="guide">가이드형</SelectItem>
-                    <SelectItem value="listicle">리스트형</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="project">프로젝트</Label>
-                <Select>
-                  <SelectTrigger id="project">
-                    <SelectValue placeholder="프로젝트 선택" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="marketing">마케팅 블로그</SelectItem>
-                    <SelectItem value="tech">테크 블로그</SelectItem>
-                    <SelectItem value="lifestyle">라이프스타일</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="language">언어</Label>
-                <Select defaultValue="ko">
-                  <SelectTrigger id="language">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ko">한국어</SelectItem>
-                    <SelectItem value="en">English</SelectItem>
-                    <SelectItem value="vi">Tiếng Việt</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div> */}
-
-              <Button
-                className="w-full bg-gradient-primary shadow-glow"
-                size="lg"
-                onClick={handleGenerateContent}
-                disabled={generating || !title.trim()}
-              >
-                <Sparkles className="mr-2 h-5 w-5" />
-                {generating ? "생성 중..." : "콘텐츠 생성"}
-              </Button>
             </div>
           </Card>
 
           {/* Editor Panel */}
-          <Card className="p-6 shadow-md lg:col-span-2">
+          <Card className="p-6 shadow-md">
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-semibold text-foreground">
