@@ -71,7 +71,11 @@ const Keywords = () => {
 
     setLoading(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
       const { data, error } = await supabase.functions.invoke("get-top-keywords", {
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`
+        },
         body: { keyword: keyword.trim() },
       });
 
@@ -103,7 +107,11 @@ const Keywords = () => {
     setRefinedTitles([]);
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
       const { data, error } = await supabase.functions.invoke("refine-keyword", {
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`
+        },
         body: { keyword: kw },
       });
 
@@ -148,7 +156,11 @@ const Keywords = () => {
     setAnalysis(null);
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
       const { data, error } = await supabase.functions.invoke("analyze-keyword", {
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`
+        },
         body: { keyword: keyword.trim() },
       });
 
