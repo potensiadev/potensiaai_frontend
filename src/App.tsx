@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import Keywords from "./pages/Keywords";
 import Write from "./pages/Write";
@@ -22,12 +23,12 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/auth" element={<Auth />} />
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/keywords" element={<Keywords />} />
-          <Route path="/write" element={<Write />} />
-          <Route path="/thumbnails" element={<Thumbnails />} />
-          <Route path="/projects" element={<Projects />} />
-          <Route path="/settings" element={<Settings />} />
+          <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/keywords" element={<ProtectedRoute><Keywords /></ProtectedRoute>} />
+          <Route path="/write" element={<ProtectedRoute><Write /></ProtectedRoute>} />
+          <Route path="/thumbnails" element={<ProtectedRoute><Thumbnails /></ProtectedRoute>} />
+          <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

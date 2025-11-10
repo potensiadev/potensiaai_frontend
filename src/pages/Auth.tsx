@@ -12,6 +12,7 @@ import { Loader2 } from "lucide-react";
 const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const navigate = useNavigate();
@@ -41,6 +42,9 @@ const Auth = () => {
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            display_name: displayName,
+          },
         },
       });
 
@@ -157,6 +161,18 @@ const Auth = () => {
             
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="signup-name">이름</Label>
+                  <Input
+                    id="signup-name"
+                    type="text"
+                    placeholder="홍길동"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    required
+                    disabled={loading}
+                  />
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">이메일</Label>
                   <Input
