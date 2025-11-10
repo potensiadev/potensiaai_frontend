@@ -26,7 +26,7 @@ const Auth = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         // Redirect to the page they came from, or dashboard
-        const from = new URLSearchParams(window.location.search).get('from') || '/dashboard';
+        const from = new URLSearchParams(window.location.search).get('from') || '/';
         navigate(from);
       }
       setCheckingAuth(false);
@@ -57,7 +57,7 @@ const Auth = () => {
         description: "자동으로 로그인되었습니다.",
       });
       
-      navigate("/dashboard");
+      navigate("/");
     } catch (error: any) {
       toast({
         title: "회원가입 실패",
@@ -86,7 +86,7 @@ const Auth = () => {
         description: "환영합니다!",
       });
       
-      navigate("/dashboard");
+      navigate("/");
     } catch (error: any) {
       toast({
         title: "로그인 실패",
