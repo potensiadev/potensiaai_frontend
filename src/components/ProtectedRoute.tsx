@@ -10,18 +10,28 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setIsAuthenticated(!!user);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        setIsAuthenticated(!!user);
 
-      if (user) {
-        // Check if user needs password reset
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("needs_password_reset")
-          .eq("id", user.id)
-          .single();
+        if (user) {
+          // Check if user needs password reset
+          const { data: profile, error } = await supabase
+            .from("profiles")
+            .select("needs_password_reset")
+            .eq("id", user.id)
+            .maybeSingle();
 
-        setNeedsPasswordReset(profile?.needs_password_reset || false);
+          // Only set needsPasswordReset if profile exists and flag is true
+          if (!error && profile?.needs_password_reset) {
+            setNeedsPasswordReset(true);
+          } else {
+            setNeedsPasswordReset(false);
+          }
+        }
+      } catch (error) {
+        console.error("Error checking auth:", error);
+        setIsAuthenticated(false);
       }
     };
 
@@ -31,13 +41,22 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
       setIsAuthenticated(!!session);
       
       if (session?.user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("needs_password_reset")
-          .eq("id", session.user.id)
-          .single();
+        try {
+          const { data: profile, error } = await supabase
+            .from("profiles")
+            .select("needs_password_reset")
+            .eq("id", session.user.id)
+            .maybeSingle();
 
-        setNeedsPasswordReset(profile?.needs_password_reset || false);
+          if (!error && profile?.needs_password_reset) {
+            setNeedsPasswordReset(true);
+          } else {
+            setNeedsPasswordReset(false);
+          }
+        } catch (error) {
+          console.error("Error checking profile:", error);
+          setNeedsPasswordReset(false);
+        }
       } else {
         setNeedsPasswordReset(false);
       }
