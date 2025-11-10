@@ -16,22 +16,22 @@ export const PasswordResetRequest = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth?reset=true`,
+      const { data, error } = await supabase.functions.invoke("send-temporary-password", {
+        body: { email },
       });
 
       if (error) throw error;
 
       toast({
-        title: "이메일을 확인하세요",
-        description: "비밀번호 재설정 링크가 발송되었습니다.",
+        title: "임시 비밀번호가 발송되었습니다",
+        description: data.message || "이메일을 확인하여 임시 비밀번호로 로그인해주세요.",
       });
 
       setEmail("");
     } catch (error: any) {
       toast({
         title: "요청 실패",
-        description: error.message,
+        description: error.message || "임시 비밀번호 발송 중 오류가 발생했습니다.",
         variant: "destructive",
       });
     } finally {
@@ -53,7 +53,7 @@ export const PasswordResetRequest = () => {
           required
         />
         <p className="text-xs text-muted-foreground">
-          가입한 이메일 주소로 비밀번호 재설정 링크를 보내드립니다.
+          가입한 이메일 주소로 임시 비밀번호를 발송해드립니다. 임시 비밀번호로 로그인 후 새 비밀번호로 변경해주세요.
         </p>
       </div>
 
@@ -64,7 +64,7 @@ export const PasswordResetRequest = () => {
             전송 중...
           </>
         ) : (
-          "재설정 링크 받기"
+          "임시 비밀번호 받기"
         )}
       </Button>
     </form>

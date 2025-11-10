@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.publish-to-wordpress]
 verify_jwt = true
+
+[functions.send-temporary-password]
+verify_jwt = false
