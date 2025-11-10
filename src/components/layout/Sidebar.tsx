@@ -13,10 +13,9 @@ import {
 import { cn } from "@/lib/utils";
 
 const navigation = [
-  { name: "대시보드", href: "/", icon: LayoutDashboard },
+  { name: "대시보드", href: "/dashboard", icon: LayoutDashboard },
   { name: "AI 글쓰기", href: "/write", icon: Sparkles },
-  { name: "프로젝트", href: "/projects", icon: FolderOpen },
-  { name: "포스트 관리", href: "/posts", icon: FileText },
+  { name: "포스트 관리", href: "/projects", icon: FileText },
   { name: "키워드 리서치", href: "/keywords", icon: Search },
   { name: "썸네일 생성", href: "/thumbnails", icon: Image },
   { name: "분석", href: "/analytics", icon: BarChart3 },

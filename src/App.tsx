@@ -10,6 +10,8 @@ import Keywords from "./pages/Keywords";
 import Write from "./pages/Write";
 import Thumbnails from "./pages/Thumbnails";
 import Projects from "./pages/Projects";
+import Analytics from "./pages/Analytics";
+import Automation from "./pages/Automation";
 import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
@@ -32,6 +34,8 @@ const App = () => (
           <Route path="/write" element={<ProtectedRoute><Write /></ProtectedRoute>} />
           <Route path="/thumbnails" element={<ProtectedRoute><Thumbnails /></ProtectedRoute>} />
           <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
+          <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+          <Route path="/automation" element={<ProtectedRoute><Automation /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
