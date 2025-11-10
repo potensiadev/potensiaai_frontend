@@ -56,37 +56,6 @@ const Index = () => {
               </Link>
             </div>
           </div>
-
-          {/* Dashboard Preview */}
-          <div className="mt-20 animate-fade-in" style={{ animationDelay: "0.2s" }}>
-            <Card className="p-2 shadow-lg">
-              <div className="aspect-video bg-gradient-subtle rounded-lg border border-border overflow-hidden">
-                <div className="w-full h-full bg-card p-6">
-                  <div className="grid grid-cols-4 gap-4 mb-6">
-                    <div className="bg-primary/10 rounded-lg p-4 border border-primary/20">
-                      <div className="text-sm text-muted-foreground mb-1">총 게시물</div>
-                      <div className="text-2xl font-bold text-foreground">1,234</div>
-                    </div>
-                    <div className="bg-secondary/10 rounded-lg p-4 border border-secondary/20">
-                      <div className="text-sm text-muted-foreground mb-1">총 조회수</div>
-                      <div className="text-2xl font-bold text-foreground">45.2K</div>
-                    </div>
-                    <div className="bg-accent/10 rounded-lg p-4 border border-accent/20">
-                      <div className="text-sm text-muted-foreground mb-1">AI 생성</div>
-                      <div className="text-2xl font-bold text-foreground">856</div>
-                    </div>
-                    <div className="bg-success/10 rounded-lg p-4 border border-success/20">
-                      <div className="text-sm text-muted-foreground mb-1">수익</div>
-                      <div className="text-2xl font-bold text-foreground">$1.2K</div>
-                    </div>
-                  </div>
-                  <div className="bg-muted/30 rounded-lg h-32 flex items-center justify-center">
-                    <BarChart3 className="h-16 w-16 text-muted-foreground/50" />
-                  </div>
-                </div>
-              </div>
-            </Card>
-          </div>
         </div>
       </section>
 
