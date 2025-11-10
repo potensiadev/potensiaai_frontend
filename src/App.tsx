@@ -8,6 +8,7 @@ import Keywords from "./pages/Keywords";
 import Write from "./pages/Write";
 import Thumbnails from "./pages/Thumbnails";
 import Projects from "./pages/Projects";
+import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/write" element={<Write />} />
           <Route path="/thumbnails" element={<Thumbnails />} />
           <Route path="/projects" element={<Projects />} />
+          <Route path="/settings" element={<Settings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
