@@ -21,9 +21,11 @@ export type Database = {
           content_tone: string
           created_at: string
           id: string
+          publish_status: string | null
           thumbnail_image: string | null
           title: string
           user_id: string
+          wordpress_post_id: string | null
         }
         Insert: {
           content: string
@@ -31,9 +33,11 @@ export type Database = {
           content_tone: string
           created_at?: string
           id?: string
+          publish_status?: string | null
           thumbnail_image?: string | null
           title: string
           user_id: string
+          wordpress_post_id?: string | null
         }
         Update: {
           content?: string
@@ -41,9 +45,11 @@ export type Database = {
           content_tone?: string
           created_at?: string
           id?: string
+          publish_status?: string | null
           thumbnail_image?: string | null
           title?: string
           user_id?: string
+          wordpress_post_id?: string | null
         }
         Relationships: []
       }

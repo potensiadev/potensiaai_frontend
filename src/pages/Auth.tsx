@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { PasswordResetRequest } from "@/components/settings/PasswordResetRequest";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -17,6 +18,7 @@ const Auth = () => {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     // Check if user is already logged in
@@ -114,10 +116,11 @@ const Auth = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+          <Tabs defaultValue={searchParams.get("reset") ? "reset" : "login"} className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="login">로그인</TabsTrigger>
               <TabsTrigger value="signup">회원가입</TabsTrigger>
+              <TabsTrigger value="reset">비밀번호 찾기</TabsTrigger>
             </TabsList>
             
             <TabsContent value="login">
@@ -212,6 +215,15 @@ const Auth = () => {
                   )}
                 </Button>
               </form>
+            </TabsContent>
+            
+            <TabsContent value="reset">
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  가입하신 이메일 주소로 비밀번호 재설정 링크를 보내드립니다.
+                </p>
+                <PasswordResetRequest />
+              </div>
             </TabsContent>
           </Tabs>
         </CardContent>
