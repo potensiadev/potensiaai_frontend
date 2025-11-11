@@ -1,13 +1,22 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useNavigate } from "react-router-dom";
-import { Sparkles, TrendingUp, ImagePlus, Share2, Zap, BarChart3 } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
+import { Sparkles, TrendingUp, ImagePlus, Share2, Zap, BarChart3, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
-  const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -21,8 +30,77 @@ const Index = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const handleNavigateToAuth = () => {
-    navigate("/auth");
+  const handleOpenAuthDialog = () => {
+    setShowAuthDialog(true);
+  };
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            display_name: displayName,
+          },
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "계정이 생성되었습니다!",
+        description: "자동으로 로그인되었습니다.",
+      });
+
+      setShowAuthDialog(false);
+      setEmail("");
+      setPassword("");
+      setDisplayName("");
+    } catch (error: any) {
+      toast({
+        title: "회원가입 실패",
+        description: error.message || "회원가입 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "로그인 성공",
+        description: "환영합니다!",
+      });
+
+      setShowAuthDialog(false);
+      setEmail("");
+      setPassword("");
+    } catch (error: any) {
+      toast({
+        title: "로그인 실패",
+        description: error.message || "로그인 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -36,11 +114,11 @@ const Index = () => {
           </div>
           <div className="flex items-center gap-4">
             {!user && (
-              <Button variant="ghost" onClick={handleNavigateToAuth}>
+              <Button variant="ghost" onClick={handleOpenAuthDialog}>
                 로그인
               </Button>
             )}
-            <Button onClick={handleNavigateToAuth}>시작하기</Button>
+            <Button onClick={handleOpenAuthDialog}>시작하기</Button>
           </div>
         </div>
       </nav>
@@ -65,7 +143,7 @@ const Index = () => {
               WordPress 자동 발행으로 콘텐츠 관리를 더욱 쉽게.
             </p>
             <div className="flex items-center justify-center gap-4 pt-4">
-              <Button size="lg" className="text-lg px-8" onClick={handleNavigateToAuth}>
+              <Button size="lg" className="text-lg px-8" onClick={handleOpenAuthDialog}>
                 무료로 시작하기
               </Button>
             </div>
@@ -177,7 +255,7 @@ const Index = () => {
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
               PotensiaAI와 함께 블로그 운영을 자동화하고, 더 많은 수익을 창출하세요.
             </p>
-            <Button size="lg" className="text-lg px-12" onClick={handleNavigateToAuth}>
+            <Button size="lg" className="text-lg px-12" onClick={handleOpenAuthDialog}>
               무료로 시작하기
             </Button>
           </Card>
@@ -190,6 +268,118 @@ const Index = () => {
           <p>&copy; 2024 PotensiaAI. All rights reserved.</p>
         </div>
       </footer>
+
+      {/* Auth Dialog */}
+      <Dialog open={showAuthDialog} onOpenChange={setShowAuthDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-center">PotensiaAI</DialogTitle>
+            <DialogDescription className="text-center">
+              AI 기반 블로그 자동화 플랫폼
+            </DialogDescription>
+          </DialogHeader>
+          <Tabs defaultValue="login" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="login">로그인</TabsTrigger>
+              <TabsTrigger value="signup">회원가입</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="login">
+              <form onSubmit={handleSignIn} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="login-email">이메일</Label>
+                  <Input
+                    id="login-email"
+                    type="email"
+                    placeholder="your@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    disabled={loading}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="login-password">비밀번호</Label>
+                  <Input
+                    id="login-password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    disabled={loading}
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      로그인 중...
+                    </>
+                  ) : (
+                    "로그인"
+                  )}
+                </Button>
+              </form>
+            </TabsContent>
+
+            <TabsContent value="signup">
+              <form onSubmit={handleSignUp} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="signup-name">이름</Label>
+                  <Input
+                    id="signup-name"
+                    type="text"
+                    placeholder="홍길동"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    required
+                    disabled={loading}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-email">이메일</Label>
+                  <Input
+                    id="signup-email"
+                    type="email"
+                    placeholder="your@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    disabled={loading}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-password">비밀번호</Label>
+                  <Input
+                    id="signup-password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    disabled={loading}
+                    minLength={6}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    최소 6자 이상 입력해주세요
+                  </p>
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      회원가입 중...
+                    </>
+                  ) : (
+                    "회원가입"
+                  )}
+                </Button>
+              </form>
+            </TabsContent>
+          </Tabs>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
