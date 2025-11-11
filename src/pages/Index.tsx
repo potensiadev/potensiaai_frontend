@@ -151,7 +151,7 @@ const Index = () => {
                   🚀 Potensia AI
                 </div>
               </div>
-              <h1 className="text-5xl md:text-7xl font-bold text-foreground leading-tight">
+              <h1 className="text-4xl md:text-6xl font-bold text-foreground leading-tight">
                 키워드만 주면,
                 <br />
                 <span className="bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
@@ -179,10 +179,6 @@ const Index = () => {
             </div>
             <div className="relative">
               <img src={heroImage} alt="AI 블로그 자동화" className="rounded-2xl shadow-2xl border border-border" />
-              <div className="absolute -bottom-6 -right-6 bg-background/95 backdrop-blur-sm p-6 rounded-xl shadow-xl border border-border max-w-xs">
-                <p className="text-sm font-medium text-foreground mb-2">💡 한 문장 요약</p>
-                <p className="text-xs text-muted-foreground">"내 시간을 대신 써주는 AI 블로그 자동화"</p>
-              </div>
             </div>
           </div>
         </div>
@@ -196,7 +192,7 @@ const Index = () => {
               블로그는 여전히 <span className="text-primary">돈이 됩니다</span>
             </h2>
             <p className="text-xl text-muted-foreground">
-              하지만 글을 쓸 시간은 없습니다.
+              하지만 우리는 글을 쓸 시간이 없습니다.
               <br />
               그래서 AI가 글을 쓰고, 썸네일을 만들고, 업로드까지 대신합니다.
             </p>
@@ -208,25 +204,24 @@ const Index = () => {
                 <img src={coffeeImage} alt="편안한 블로그 운영" className="rounded-xl shadow-lg" />
               </div>
               <div className="space-y-6">
-                <h3 className="text-3xl font-bold text-foreground">✨상상해보세요</h3>
+                <h3 className="text-3xl font-bold text-foreground">상상해보세요</h3>
                 <div className="space-y-4 text-muted-foreground">
                   <p className="flex items-start gap-3">
                     <Clock className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
-                    <span>출근 전 커피 한 잔을 내리는 동안, 오늘의 키워드 하나를 입력합니다.</span>
+                    <span>출근하면서 키워드 하나를 입력합니다</span>
                   </p>
                   <p className="flex items-start gap-3">
                     <Sparkles className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
-                    <span>퇴근 무렵엔 — 완성된 블로그 글이 워드프레스에 자동 발행되어 있습니다.</span>
+                    <span>회사에 도착하면 완성된 블로그 글이 워드프레스에 자동 발행되어 있습니다</span>
                   </p>
                   <p className="flex items-start gap-3">
                     <DollarSign className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
                     <span>
-                      SEO까지 최적화된 콘텐츠가 이미 노출을 시작했고, 그 글은 여러분 대신 방문자와 광고 수익을
-                      만들어냅니다.
+                      SEO AEO까지 최적화된 콘텐츠가 노출을 시작했고, 그 글은 '나' 대신 광고 수익을 만들어냅니다.
                     </span>
                   </p>
                 </div>
-                <p className="text-2xl font-bold text-foreground italic">"나는 출근했는데, 블로그는 쉬지 않습니다."</p>
+                <p className="text-1xl font-bold text-foreground italic">"나는 출근했는데, 블로그는 쉬지 않습니다."</p>
               </div>
             </div>
           </Card>
@@ -271,37 +266,32 @@ const Index = () => {
       <section className="py-20 px-4 bg-muted/30">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center space-y-4 mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-foreground">💬 실제 사용자 후기</h2>
+            <h2 className="text-4xl md:text-5xl font-bold text-foreground">실제 사용자 후기💬</h2>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
             <Card className="p-6 hover:shadow-lg transition-all duration-300">
               <div className="mb-4">
                 <div className="text-3xl mb-2">🧠</div>
-                <h3 className="text-xl font-bold text-foreground mb-2">"이건 진짜 비서입니다"</h3>
+                <h3 className="text-l font-bold text-foreground mb-2">"이건 진짜 비서에요"</h3>
               </div>
-              <p className="text-muted-foreground mb-4">예전엔 글 하나 쓰는데 3시간 걸렸는데 지금은 3분이면 끝나요.</p>
-              <p className="text-sm text-muted-foreground italic">
-                AI가 제 말투를 기억해서 점점 더 제 목소리처럼 써요.
-              </p>
+              <p className="text-muted-foreground mb-4">예전엔 글 하나 쓰는데 3시간 걸렸는데 지금은 3분이면 끝나요. AI가 제 말투를 기억해서 점점 더 제 목소리처럼 써요.</p>
             </Card>
 
             <Card className="p-6 hover:shadow-lg transition-all duration-300 border-2 border-primary">
               <div className="mb-4">
                 <div className="text-3xl mb-2">💰</div>
-                <h3 className="text-xl font-bold text-foreground mb-2">"부수입이 아니라, 수익 구조가 됐어요"</h3>
+                <h3 className="text-x font-bold text-foreground mb-2">"부수입이 본업이 됐어요"</h3>
               </div>
-              <p className="text-muted-foreground mb-4">매일 자동 발행된 글들로 애드센스 수익이 납니다.</p>
-              <p className="text-sm text-muted-foreground italic">키워드만 입력했는데, 돈은 계속 들어오네요.</p>
+              <p className="text-muted-foreground mb-4">매일 자동 발행된 글들로 애드센스 수익이 납니다.키워드만 입력했는데, 돈은 계속 들어오네요.</p>
             </Card>
 
             <Card className="p-6 hover:shadow-lg transition-all duration-300">
               <div className="mb-4">
                 <div className="text-3xl mb-2">⚡</div>
-                <h3 className="text-xl font-bold text-foreground mb-2">"결국 '시간을 사는 서비스'입니다"</h3>
+                <h3 className="text-x font-bold text-foreground mb-2">'시간을 사는 서비스'입니다</h3>
               </div>
-              <p className="text-muted-foreground mb-4">직장 다니면서 블로그 운영할 시간이 없었는데,</p>
-              <p className="text-sm text-muted-foreground italic">지금은 AI가 저 대신 성장시키고 있습니다.</p>
+              <p className="text-muted-foreground mb-4">직장 다니면서 블로그 운영할 시간이 없었는데,지금은 AI가 저 대신 성장시키고 있습니다.</p>
             </Card>
           </div>
         </div>
