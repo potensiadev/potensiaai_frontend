@@ -36,12 +36,6 @@ const Index = () => {
             <span className="text-xl font-bold text-foreground">PotensiaAI</span>
           </div>
           <div className="flex items-center gap-4">
-            <Link to="/auth">
-              <Button variant="ghost">로그인</Button>
-            </Link>
-            <Link to="/auth">
-              <Button>시작하기</Button>
-            </Link>
             {!user && (
               <Button variant="ghost" onClick={handleNavigateToAuth}>
                 로그인
@@ -72,19 +66,14 @@ const Index = () => {
               WordPress 자동 발행으로 콘텐츠 관리를 더욱 쉽게.
             </p>
             <div className="flex items-center justify-center gap-4 pt-4">
-              <Link to="/auth">
-                <Button size="lg" className="text-lg px-8">
-                  무료로 시작하기
-                </Button>
-              </Link>
+              <Button size="lg" className="text-lg px-8" onClick={handleNavigateToAuth}>
+                무료로 시작하기
+              </Button>
               <Link to="/dashboard">
                 <Button size="lg" variant="outline" className="text-lg px-8">
                   대시보드 보기
                 </Button>
               </Link>
-              <Button size="lg" className="text-lg px-8" onClick={handleNavigateToAuth}>
-                무료로 시작하기
-              </Button>
             </div>
           </div>
         </div>
@@ -110,7 +99,65 @@ const Index = () => {
               </div>
               <h3 className="text-xl font-bold text-foreground mb-2">
                 키워드 분석
-@@ -141,45 +155,43 @@ const Index = () => {
+              </h3>
+              <p className="text-muted-foreground">
+                검색량과 경쟁도를 분석하여 최적의 키워드를 추천합니다. 트렌드에 맞는 콘텐츠를 작성하세요.
+              </p>
+            </Card>
+
+            {/* Feature 2 */}
+            <Card className="p-6 hover:shadow-lg transition-all duration-300 hover-scale">
+              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                <Sparkles className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold text-foreground mb-2">
+                AI 글 생성
+              </h3>
+              <p className="text-muted-foreground">
+                SEO 최적화된 고품질 블로그 글을 자동으로 생성합니다. 시간을 절약하고 효율을 높이세요.
+              </p>
+            </Card>
+
+            {/* Feature 3 */}
+            <Card className="p-6 hover:shadow-lg transition-all duration-300 hover-scale">
+              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                <ImagePlus className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold text-foreground mb-2">
+                썸네일 생성
+              </h3>
+              <p className="text-muted-foreground">
+                클릭을 유도하는 매력적인 썸네일을 AI가 자동으로 만들어줍니다. 디자인 걱정은 이제 그만.
+              </p>
+            </Card>
+
+            {/* Feature 4 */}
+            <Card className="p-6 hover:shadow-lg transition-all duration-300 hover-scale">
+              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                <Share2 className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold text-foreground mb-2">
+                자동 발행
+              </h3>
+              <p className="text-muted-foreground">
+                WordPress 블로그에 클릭 한 번으로 자동 발행됩니다. 콘텐츠 업로드가 이렇게 쉬워집니다.
+              </p>
+            </Card>
+
+            {/* Feature 5 */}
+            <Card className="p-6 hover:shadow-lg transition-all duration-300 hover-scale">
+              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                <Zap className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-xl font-bold text-foreground mb-2">
+                빠른 작업
+              </h3>
+              <p className="text-muted-foreground">
+                몇 분 만에 완성도 높은 블로그 콘텐츠를 생성합니다. 생산성을 극대화하세요.
+              </p>
+            </Card>
+
+            {/* Feature 6 */}
             <Card className="p-6 hover:shadow-lg transition-all duration-300 hover-scale">
               <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <BarChart3 className="h-6 w-6 text-primary" />
@@ -136,11 +183,6 @@ const Index = () => {
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
               PotensiaAI와 함께 블로그 운영을 자동화하고, 더 많은 수익을 창출하세요.
             </p>
-            <Link to="/auth">
-              <Button size="lg" className="text-lg px-12">
-                무료로 시작하기
-              </Button>
-            </Link>
             <Button size="lg" className="text-lg px-12" onClick={handleNavigateToAuth}>
               무료로 시작하기
             </Button>
