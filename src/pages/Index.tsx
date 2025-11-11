@@ -146,18 +146,13 @@ const Index = () => {
         <div className="container mx-auto max-w-7xl relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8 animate-fade-in">
-              <div className="inline-block">
-                <div className="px-4 py-2 rounded-full bg-gradient-to-r from-primary/20 to-accent/20 text-primary text-sm font-bold border border-primary/30">
-                  🚀 Potensia AI
-                </div>
-              </div>
               <h1 className="text-4xl md:text-6xl font-bold text-foreground leading-tight">
-                키워드만 주면,
+                키워드만 입력하면
                 <br />
                 <span className="bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
-                  완성된 블로그가
+                  블로그 자동화로
                   <br />
-                  돌아온다
+                  돈을 벌어다 준다
                 </span>
               </h1>
               <p className="text-2xl text-muted-foreground font-medium">
@@ -275,7 +270,10 @@ const Index = () => {
                 <div className="text-3xl mb-2">🧠</div>
                 <h3 className="text-l font-bold text-foreground mb-2">"이건 진짜 비서에요"</h3>
               </div>
-              <p className="text-muted-foreground mb-4">예전엔 글 하나 쓰는데 3시간 걸렸는데 지금은 3분이면 끝나요. AI가 제 말투를 기억해서 점점 더 제 목소리처럼 써요.</p>
+              <p className="text-muted-foreground mb-4">
+                예전엔 글 하나 쓰는데 3시간 걸렸는데 지금은 3분이면 끝나요. AI가 제 말투를 기억해서 점점 더 제
+                목소리처럼 써요.
+              </p>
             </Card>
 
             <Card className="p-6 hover:shadow-lg transition-all duration-300 border-2 border-primary">
@@ -283,7 +281,9 @@ const Index = () => {
                 <div className="text-3xl mb-2">💰</div>
                 <h3 className="text-x font-bold text-foreground mb-2">"부수입이 본업이 됐어요"</h3>
               </div>
-              <p className="text-muted-foreground mb-4">매일 자동 발행된 글들로 애드센스 수익이 납니다.키워드만 입력했는데, 돈은 계속 들어오네요.</p>
+              <p className="text-muted-foreground mb-4">
+                매일 자동 발행된 글들로 애드센스 수익이 납니다.키워드만 입력했는데, 돈은 계속 들어오네요.
+              </p>
             </Card>
 
             <Card className="p-6 hover:shadow-lg transition-all duration-300">
@@ -291,7 +291,9 @@ const Index = () => {
                 <div className="text-3xl mb-2">⚡</div>
                 <h3 className="text-x font-bold text-foreground mb-2">'시간을 사는 서비스'입니다</h3>
               </div>
-              <p className="text-muted-foreground mb-4">직장 다니면서 블로그 운영할 시간이 없었는데,지금은 AI가 저 대신 성장시키고 있습니다.</p>
+              <p className="text-muted-foreground mb-4">
+                직장 다니면서 블로그 운영할 시간이 없었는데,지금은 AI가 저 대신 성장시키고 있습니다.
+              </p>
             </Card>
           </div>
         </div>
