@@ -161,7 +161,7 @@ const Index = () => {
                 </span>
               </h1>
               <p className="text-2xl text-muted-foreground font-medium">
-                단 10초. 키워드를 입력하세요.
+                키워드만 입력하세요.
                 <br />
                 나머지는 Potensia AI가 다 합니다.
               </p>
@@ -175,20 +175,6 @@ const Index = () => {
                   <Rocket className="mr-2 h-5 w-5" />
                   무료 시작하기
                 </Button>
-              </div>
-              <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <span>무료 체험</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <span>신용카드 불필요</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <span>즉시 시작</span>
-                </div>
               </div>
             </div>
             <div className="relative">
