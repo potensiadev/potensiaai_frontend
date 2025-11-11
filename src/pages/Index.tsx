@@ -418,10 +418,10 @@ const Index = () => {
 
       {/* Investment Section */}
       <section className="py-20 px-4">
-        <div className="container mx-auto max-w-4xl">
+        <div className="container mx-auto max-w-3xl">
           <Card className="p-12 bg-gradient-to-br from-primary/5 via-accent/5 to-secondary/5 border-2">
-            <div className="text-center space-y-6">
-              <h2 className="text-4xl md:text-5xl font-bold text-foreground">📈 이건 투자입니다, 소비가 아닙니다</h2>
+            <div className="text-center space-y-5">
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground"> 이건 투자입니다, 소비가 아닙니다</h2>
               <div className="space-y-4 text-lg text-muted-foreground">
                 <p>매일 글을 대신 써주는 AI.</p>
                 <p>매일 클릭 수를 올려주는 자동화.</p>
@@ -430,41 +430,6 @@ const Index = () => {
               <p className="text-2xl font-bold text-primary">Potensia AI는 나의 "시간을 복제해주는 서비스"입니다.</p>
             </div>
           </Card>
-        </div>
-      </section>
-
-      {/* Final Story */}
-      <section className="py-20 px-4 bg-muted/30">
-        <div className="container mx-auto max-w-4xl text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-8">
-            🎬 블로그 자동화로 돈이 벌리는 모습을 상상해보세요
-          </h2>
-          <div className="space-y-6 text-lg text-muted-foreground mb-12">
-            <p>
-              침대에 누워 있는데,
-              <br />
-              AI가 새 글을 발행합니다.
-            </p>
-            <p>
-              다음 날 아침,
-              <br />
-              트래픽 그래프가 살짝 올라가 있습니다.
-            </p>
-            <p className="text-xl font-bold text-foreground italic">
-              그건 단순한 조회수가 아니라,
-              <br />
-              "시간을 번 사람만이 볼 수 있는 숫자입니다."
-            </p>
-          </div>
-          <Button
-            size="lg"
-            className="text-xl px-16 py-8 shadow-2xl hover:shadow-3xl transition-all"
-            onClick={handleOpenAuthDialog}
-          >
-            <Zap className="mr-2 h-6 w-6" />
-            🪄 지금 바로 Potensia AI를 시작하세요
-          </Button>
-          <p className="text-sm text-muted-foreground mt-6">더 이상 블로그에 시간 들이지 마세요.</p>
         </div>
       </section>
 
