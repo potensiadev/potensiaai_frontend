@@ -137,7 +137,7 @@ const Index = () => {
                 </div>
               </div>
               <h1 className="text-5xl md:text-7xl font-bold text-foreground leading-tight">
-                키워드만 던지면,<br />
+                키워드만 주면,<br />
                 <span className="bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
                   완성된 블로그가<br />
                   돌아온다
@@ -175,7 +175,7 @@ const Index = () => {
               <img src={heroImage} alt="AI 블로그 자동화" className="rounded-2xl shadow-2xl border border-border" />
               <div className="absolute -bottom-6 -right-6 bg-background/95 backdrop-blur-sm p-6 rounded-xl shadow-xl border border-border max-w-xs">
                 <p className="text-sm font-medium text-foreground mb-2">💡 한 문장 요약</p>
-                <p className="text-xs text-muted-foreground">"내 시간을 대신 써주는 AI 블로그 운영 비서"</p>
+                <p className="text-xs text-muted-foreground">"내 시간을 대신 써주는 AI 블로그 자동화"</p>
               </div>
             </div>
           </div>
@@ -190,8 +190,8 @@ const Index = () => {
               블로그는 여전히 <span className="text-primary">돈이 됩니다</span>
             </h2>
             <p className="text-xl text-muted-foreground">
-              하지만 시간은 없습니다.<br />
-              그래서 Potensia AI가 글을 쓰고, 썸네일을 만들고, 업로드까지 대신합니다.
+              하지만 글을 쓸 시간은 없습니다.<br />
+              그래서 AI가 글을 쓰고, 썸네일을 만들고, 업로드까지 대신합니다.
             </p>
           </div>
 
@@ -201,11 +201,11 @@ const Index = () => {
                 <img src={coffeeImage} alt="편안한 블로그 운영" className="rounded-xl shadow-lg" />
               </div>
               <div className="space-y-6">
-                <h3 className="text-3xl font-bold text-foreground">✨ 한 장면을 상상해보세요</h3>
+                <h3 className="text-3xl font-bold text-foreground">✨상상해보세요</h3>
                 <div className="space-y-4 text-muted-foreground">
                   <p className="flex items-start gap-3">
                     <Clock className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
-                    <span>출근 전 커피 한 잔을 내리는 동안, Potensia AI에 오늘의 키워드 하나를 입력합니다.</span>
+                    <span>출근 전 커피 한 잔을 내리는 동안, 오늘의 키워드 하나를 입력합니다.</span>
                   </p>
                   <p className="flex items-start gap-3">
                     <Sparkles className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
@@ -213,11 +213,11 @@ const Index = () => {
                   </p>
                   <p className="flex items-start gap-3">
                     <DollarSign className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
-                    <span>SEO까지 최적화된 콘텐츠가 이미 노출을 시작했고, 그 글은 당신 대신 방문자와 광고 수익을 만들어냅니다.</span>
+                    <span>SEO까지 최적화된 콘텐츠가 이미 노출을 시작했고, 그 글은 여러분 대신 방문자와 광고 수익을 만들어냅니다.</span>
                   </p>
                 </div>
                 <p className="text-2xl font-bold text-foreground italic">
-                  "나는 출근했는데, 블로그는 쉬지 않는다."
+                  "나는 출근했는데, 블로그는 쉬지 않습니다."
                 </p>
               </div>
             </div>
@@ -233,17 +233,17 @@ const Index = () => {
               ⚙️ 이렇게 작동합니다
             </h2>
             <p className="text-lg text-muted-foreground">
-              모든 과정이 100% 자동화. 당신은 "주제"만 결정하면 됩니다.
+              모든 과정이 100% 자동화. 여러분은 "키워드"만 정하면 됩니다.
             </p>
           </div>
 
           <div className="grid md:grid-cols-5 gap-6">
             {[
               { num: "1", icon: TrendingUp, title: "키워드 입력", desc: "관심 주제 키워드 하나만 입력" },
-              { num: "2", icon: BarChart3, title: "AI 분석", desc: "트렌드·경쟁도 자동 분석" },
+              { num: "2", icon: BarChart3, title: "AI 분석", desc: "트렌드／경쟁도 자동 분석" },
               { num: "3", icon: Sparkles, title: "콘텐츠 생성", desc: "완성된 글 + 썸네일 자동 생성" },
               { num: "4", icon: Share2, title: "자동 발행", desc: "워드프레스에 원클릭 발행" },
-              { num: "5", icon: BarChart3, title: "성과 분석", desc: "수익·트래픽 리포트 확인" },
+              { num: "5", icon: BarChart3, title: "성과 분석", desc: "수익／트래픽 리포트 확인" },
             ].map((step) => (
               <Card key={step.num} className="p-6 text-center hover:shadow-lg transition-all duration-300 hover-scale relative">
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
@@ -276,10 +276,10 @@ const Index = () => {
                 <h3 className="text-xl font-bold text-foreground mb-2">"이건 진짜 비서입니다"</h3>
               </div>
               <p className="text-muted-foreground mb-4">
-                예전엔 글 하나 쓰는데 3시간 걸렸어요. 지금은 3분이면 끝나요.
+                예전엔 글 하나 쓰는데 3시간 걸렸는데 지금은 3분이면 끝나요.
               </p>
               <p className="text-sm text-muted-foreground italic">
-                AI가 제 스타일을 기억하고 점점 더 제 목소리처럼 써요.
+                AI가 제 말투를 기억해서 점점 더 제 목소리처럼 써요.
               </p>
             </Card>
 
@@ -289,10 +289,10 @@ const Index = () => {
                 <h3 className="text-xl font-bold text-foreground mb-2">"부수입이 아니라, 수익 구조가 됐어요"</h3>
               </div>
               <p className="text-muted-foreground mb-4">
-                매일 새벽 자동 발행된 글들이 하루 수천원씩 벌어줍니다.
+                매일 자동 발행된 글들로 애드센스 수익이 납니다.
               </p>
               <p className="text-sm text-muted-foreground italic">
-                제가 안 쓴 글인데, 돈은 계속 들어오네요.
+                키워드만 입력했는데, 돈은 계속 들어오네요.
               </p>
             </Card>
 
@@ -302,10 +302,10 @@ const Index = () => {
                 <h3 className="text-xl font-bold text-foreground mb-2">"결국 '시간을 사는 서비스'입니다"</h3>
               </div>
               <p className="text-muted-foreground mb-4">
-                직장 다니면서 블로그 유지가 불가능했는데,
+                직장 다니면서 블로그 운영할 시간이 없었는데,
               </p>
               <p className="text-sm text-muted-foreground italic">
-                지금은 AI가 제 대신 성장시키고 있습니다.
+                지금은 AI가 저 대신 성장시키고 있습니다.
               </p>
             </Card>
           </div>
@@ -317,7 +317,7 @@ const Index = () => {
         <div className="container mx-auto max-w-5xl">
           <div className="text-center space-y-4 mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-foreground">
-              🎯 왜 Potensia AI인가?
+              🎯 왜 Potensia AI인가요?
             </h2>
           </div>
 
@@ -358,7 +358,7 @@ const Index = () => {
                 Potensia AI는 "그냥 글을 쓰는 도구"가 아닙니다.
               </p>
               <p className="text-xl font-bold text-primary mt-2">
-                "돈이 되는 콘텐츠 시스템"입니다.
+                "돈을 벌어주는 콘텐츠 시스템"입니다.
               </p>
             </div>
           </Card>
@@ -370,7 +370,7 @@ const Index = () => {
         <div className="container mx-auto max-w-6xl">
           <div className="text-center space-y-4 mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-foreground">
-              🧭 이 서비스를 쓰면 이렇게 바뀝니다
+              🧭 Potensia AI를 쓰면 이렇게 바뀝니다
             </h2>
           </div>
 
@@ -429,10 +429,10 @@ const Index = () => {
               <div className="space-y-4 text-lg text-muted-foreground">
                 <p>매일 글을 대신 써주는 AI.</p>
                 <p>매일 클릭 수를 올려주는 자동화.</p>
-                <p>매일 당신 대신 일해주는 시스템.</p>
+                <p>매일 나 대신 일해주는 시스템.</p>
               </div>
               <p className="text-2xl font-bold text-primary">
-                Potensia AI는 당신의 "시간을 복제해주는 서비스"입니다.
+                Potensia AI는 나의 "시간을 복제해주는 서비스"입니다.
               </p>
             </div>
           </Card>
@@ -443,14 +443,14 @@ const Index = () => {
       <section className="py-20 px-4 bg-muted/30">
         <div className="container mx-auto max-w-4xl text-center">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-8">
-            🎬 마지막 장면을 상상해보세요
+            🎬 블로그 자동화로 돈이 벌리는 모습을 상상해보세요
           </h2>
           <div className="space-y-6 text-lg text-muted-foreground mb-12">
-            <p>밤 11시. 침대에 누워 있는데,<br />AI가 방금 새 글을 발행합니다.</p>
+            <p>침대에 누워 있는데,<br />AI가 새 글을 발행합니다.</p>
             <p>다음 날 아침,<br />트래픽 그래프가 살짝 올라가 있습니다.</p>
             <p className="text-xl font-bold text-foreground italic">
               그건 단순한 조회수가 아니라,<br />
-              "시간을 번 사람만이 볼 수 있는 숫자."
+              "시간을 번 사람만이 볼 수 있는 숫자입니다."
             </p>
           </div>
           <Button size="lg" className="text-xl px-16 py-8 shadow-2xl hover:shadow-3xl transition-all" onClick={handleOpenAuthDialog}>
@@ -458,7 +458,7 @@ const Index = () => {
             🪄 지금 바로 Potensia AI를 시작하세요
           </Button>
           <p className="text-sm text-muted-foreground mt-6">
-            단 한 번의 클릭이, 매일의 시간을 되찾게 합니다.
+            더 이상 블로그에 시간 들이지 마세요.
           </p>
         </div>
       </section>
