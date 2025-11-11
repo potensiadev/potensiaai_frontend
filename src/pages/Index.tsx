@@ -1,9 +1,31 @@
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Sparkles, TrendingUp, ImagePlus, Share2, Zap, BarChart3 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
+  const navigate = useNavigate();
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleNavigateToAuth = () => {
+    navigate("/auth");
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
@@ -20,6 +42,12 @@ const Index = () => {
             <Link to="/auth">
               <Button>시작하기</Button>
             </Link>
+            {!user && (
+              <Button variant="ghost" onClick={handleNavigateToAuth}>
+                로그인
+              </Button>
+            )}
+            <Button onClick={handleNavigateToAuth}>시작하기</Button>
           </div>
         </div>
       </nav>
@@ -54,6 +82,9 @@ const Index = () => {
                   대시보드 보기
                 </Button>
               </Link>
+              <Button size="lg" className="text-lg px-8" onClick={handleNavigateToAuth}>
+                무료로 시작하기
+              </Button>
             </div>
           </div>
         </div>
@@ -79,65 +110,7 @@ const Index = () => {
               </div>
               <h3 className="text-xl font-bold text-foreground mb-2">
                 키워드 분석
-              </h3>
-              <p className="text-muted-foreground">
-                AI가 상위 노출 가능한 키워드를 분석하고 추천합니다. 검색량, 경쟁도, 트렌드를 실시간으로 확인하세요.
-              </p>
-            </Card>
-
-            {/* Feature 2 */}
-            <Card className="p-6 hover:shadow-lg transition-all duration-300 hover-scale">
-              <div className="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center mb-4">
-                <Sparkles className="h-6 w-6 text-secondary" />
-              </div>
-              <h3 className="text-xl font-bold text-foreground mb-2">
-                AI 글쓰기
-              </h3>
-              <p className="text-muted-foreground">
-                SEO 최적화된 블로그 글을 자동으로 생성합니다. 자연스러운 문체와 구조로 높은 품질을 보장합니다.
-              </p>
-            </Card>
-
-            {/* Feature 3 */}
-            <Card className="p-6 hover:shadow-lg transition-all duration-300 hover-scale">
-              <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center mb-4">
-                <ImagePlus className="h-6 w-6 text-accent" />
-              </div>
-              <h3 className="text-xl font-bold text-foreground mb-2">
-                썸네일 생성
-              </h3>
-              <p className="text-muted-foreground">
-                콘텐츠에 어울리는 매력적인 썸네일을 AI가 자동으로 디자인합니다. 클릭률을 높이는 비주얼을 만드세요.
-              </p>
-            </Card>
-
-            {/* Feature 4 */}
-            <Card className="p-6 hover:shadow-lg transition-all duration-300 hover-scale">
-              <div className="w-12 h-12 rounded-lg bg-success/10 flex items-center justify-center mb-4">
-                <Share2 className="h-6 w-6 text-success" />
-              </div>
-              <h3 className="text-xl font-bold text-foreground mb-2">
-                WordPress 연동
-              </h3>
-              <p className="text-muted-foreground">
-                생성된 콘텐츠를 WordPress에 자동으로 발행합니다. 별도 작업 없이 즉시 블로그에 게시하세요.
-              </p>
-            </Card>
-
-            {/* Feature 5 */}
-            <Card className="p-6 hover:shadow-lg transition-all duration-300 hover-scale">
-              <div className="w-12 h-12 rounded-lg bg-warning/10 flex items-center justify-center mb-4">
-                <Zap className="h-6 w-6 text-warning" />
-              </div>
-              <h3 className="text-xl font-bold text-foreground mb-2">
-                빠른 생성
-              </h3>
-              <p className="text-muted-foreground">
-                몇 분 안에 완성도 높은 블로그 콘텐츠를 생성합니다. 시간을 절약하고 더 많은 콘텐츠를 만드세요.
-              </p>
-            </Card>
-
-            {/* Feature 6 */}
+@@ -141,45 +155,43 @@ const Index = () => {
             <Card className="p-6 hover:shadow-lg transition-all duration-300 hover-scale">
               <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
                 <BarChart3 className="h-6 w-6 text-primary" />
@@ -168,6 +141,9 @@ const Index = () => {
                 무료로 시작하기
               </Button>
             </Link>
+            <Button size="lg" className="text-lg px-12" onClick={handleNavigateToAuth}>
+              무료로 시작하기
+            </Button>
           </Card>
         </div>
       </section>
