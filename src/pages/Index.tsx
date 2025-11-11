@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { Sparkles, TrendingUp, ImagePlus, Share2, Zap, BarChart3 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -69,11 +68,6 @@ const Index = () => {
               <Button size="lg" className="text-lg px-8" onClick={handleNavigateToAuth}>
                 무료로 시작하기
               </Button>
-              <Link to="/dashboard">
-                <Button size="lg" variant="outline" className="text-lg px-8">
-                  대시보드 보기
-                </Button>
-              </Link>
             </div>
           </div>
         </div>
