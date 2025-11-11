@@ -6,8 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Sparkles, TrendingUp, ImagePlus, Share2, Zap, BarChart3, Loader2 } from "lucide-react";
+import { Sparkles, TrendingUp, ImagePlus, Share2, Zap, BarChart3, Loader2, Clock, DollarSign, Rocket, CheckCircle2, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import heroImage from "@/assets/hero-automation.jpg";
+import coffeeImage from "@/assets/coffee-automation.jpg";
 
 const Index = () => {
   const [user, setUser] = useState<any>(null);
@@ -124,30 +126,340 @@ const Index = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center space-y-6 animate-fade-in">
-            <div className="inline-block">
-              <div className="px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium">
-                AI 기반 블로그 자동화 플랫폼
+      <section className="pt-32 pb-20 px-4 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-accent/5 to-secondary/5" />
+        <div className="container mx-auto max-w-7xl relative z-10">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-8 animate-fade-in">
+              <div className="inline-block">
+                <div className="px-4 py-2 rounded-full bg-gradient-to-r from-primary/20 to-accent/20 text-primary text-sm font-bold border border-primary/30">
+                  🚀 Potensia AI
+                </div>
+              </div>
+              <h1 className="text-5xl md:text-7xl font-bold text-foreground leading-tight">
+                키워드만 던지면,<br />
+                <span className="bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
+                  완성된 블로그가<br />
+                  돌아온다
+                </span>
+              </h1>
+              <p className="text-2xl text-muted-foreground font-medium">
+                단 10초. 키워드를 입력하세요.<br />
+                나머지는 Potensia AI가 다 합니다.
+              </p>
+              <p className="text-xl text-foreground/80 italic">
+                "내 블로그가 나 대신 일하는 순간"을 경험해보세요.
+              </p>
+              <div className="flex items-center gap-4 pt-4">
+                <Button size="lg" className="text-lg px-10 py-6 shadow-lg hover:shadow-xl transition-all" onClick={handleOpenAuthDialog}>
+                  <Rocket className="mr-2 h-5 w-5" />
+                  지금 바로 시작하기
+                </Button>
+              </div>
+              <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                  <span>무료 체험</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                  <span>신용카드 불필요</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-primary" />
+                  <span>즉시 시작</span>
+                </div>
               </div>
             </div>
-            <h1 className="text-5xl md:text-7xl font-bold text-foreground leading-tight">
-              키워드만 입력하면<br />
-              <span className="bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
-                완벽한 블로그 콘텐츠
-              </span>
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              SEO 최적화된 블로그 글부터 썸네일까지, AI가 자동으로 생성합니다.
-              WordPress 자동 발행으로 콘텐츠 관리를 더욱 쉽게.
-            </p>
-            <div className="flex items-center justify-center gap-4 pt-4">
-              <Button size="lg" className="text-lg px-8" onClick={handleOpenAuthDialog}>
-                무료로 시작하기
-              </Button>
+            <div className="relative">
+              <img src={heroImage} alt="AI 블로그 자동화" className="rounded-2xl shadow-2xl border border-border" />
+              <div className="absolute -bottom-6 -right-6 bg-background/95 backdrop-blur-sm p-6 rounded-xl shadow-xl border border-border max-w-xs">
+                <p className="text-sm font-medium text-foreground mb-2">💡 한 문장 요약</p>
+                <p className="text-xs text-muted-foreground">"내 시간을 대신 써주는 AI 블로그 운영 비서"</p>
+              </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Story Section */}
+      <section className="py-20 px-4 bg-muted/30">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center space-y-6 mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-foreground">
+              블로그는 여전히 <span className="text-primary">돈이 됩니다</span>
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              하지만 시간은 없습니다.<br />
+              그래서 Potensia AI가 글을 쓰고, 썸네일을 만들고, 업로드까지 대신합니다.
+            </p>
+          </div>
+
+          <Card className="p-8 md:p-12 bg-gradient-to-br from-primary/5 to-accent/5 border-2">
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              <div>
+                <img src={coffeeImage} alt="편안한 블로그 운영" className="rounded-xl shadow-lg" />
+              </div>
+              <div className="space-y-6">
+                <h3 className="text-3xl font-bold text-foreground">✨ 한 장면을 상상해보세요</h3>
+                <div className="space-y-4 text-muted-foreground">
+                  <p className="flex items-start gap-3">
+                    <Clock className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
+                    <span>출근 전 커피 한 잔을 내리는 동안, Potensia AI에 오늘의 키워드 하나를 입력합니다.</span>
+                  </p>
+                  <p className="flex items-start gap-3">
+                    <Sparkles className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
+                    <span>퇴근 무렵엔 — 완성된 블로그 글이 워드프레스에 자동 발행되어 있습니다.</span>
+                  </p>
+                  <p className="flex items-start gap-3">
+                    <DollarSign className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
+                    <span>SEO까지 최적화된 콘텐츠가 이미 노출을 시작했고, 그 글은 당신 대신 방문자와 광고 수익을 만들어냅니다.</span>
+                  </p>
+                </div>
+                <p className="text-2xl font-bold text-foreground italic">
+                  "나는 출근했는데, 블로그는 쉬지 않는다."
+                </p>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-20 px-4">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center space-y-4 mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-foreground">
+              ⚙️ 이렇게 작동합니다
+            </h2>
+            <p className="text-lg text-muted-foreground">
+              모든 과정이 100% 자동화. 당신은 "주제"만 결정하면 됩니다.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-5 gap-6">
+            {[
+              { num: "1", icon: TrendingUp, title: "키워드 입력", desc: "관심 주제 키워드 하나만 입력" },
+              { num: "2", icon: BarChart3, title: "AI 분석", desc: "트렌드·경쟁도 자동 분석" },
+              { num: "3", icon: Sparkles, title: "콘텐츠 생성", desc: "완성된 글 + 썸네일 자동 생성" },
+              { num: "4", icon: Share2, title: "자동 발행", desc: "워드프레스에 원클릭 발행" },
+              { num: "5", icon: BarChart3, title: "성과 분석", desc: "수익·트래픽 리포트 확인" },
+            ].map((step) => (
+              <Card key={step.num} className="p-6 text-center hover:shadow-lg transition-all duration-300 hover-scale relative">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
+                  {step.num}
+                </div>
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 mx-auto mt-2">
+                  <step.icon className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-bold text-foreground mb-2">{step.title}</h3>
+                <p className="text-sm text-muted-foreground">{step.desc}</p>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="py-20 px-4 bg-muted/30">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center space-y-4 mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-foreground">
+              💬 실제 사용자 후기
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            <Card className="p-6 hover:shadow-lg transition-all duration-300">
+              <div className="mb-4">
+                <div className="text-3xl mb-2">🧠</div>
+                <h3 className="text-xl font-bold text-foreground mb-2">"이건 진짜 비서입니다"</h3>
+              </div>
+              <p className="text-muted-foreground mb-4">
+                예전엔 글 하나 쓰는데 3시간 걸렸어요. 지금은 3분이면 끝나요.
+              </p>
+              <p className="text-sm text-muted-foreground italic">
+                AI가 제 스타일을 기억하고 점점 더 제 목소리처럼 써요.
+              </p>
+            </Card>
+
+            <Card className="p-6 hover:shadow-lg transition-all duration-300 border-2 border-primary">
+              <div className="mb-4">
+                <div className="text-3xl mb-2">💰</div>
+                <h3 className="text-xl font-bold text-foreground mb-2">"부수입이 아니라, 수익 구조가 됐어요"</h3>
+              </div>
+              <p className="text-muted-foreground mb-4">
+                매일 새벽 자동 발행된 글들이 하루 수천원씩 벌어줍니다.
+              </p>
+              <p className="text-sm text-muted-foreground italic">
+                제가 안 쓴 글인데, 돈은 계속 들어오네요.
+              </p>
+            </Card>
+
+            <Card className="p-6 hover:shadow-lg transition-all duration-300">
+              <div className="mb-4">
+                <div className="text-3xl mb-2">⚡</div>
+                <h3 className="text-xl font-bold text-foreground mb-2">"결국 '시간을 사는 서비스'입니다"</h3>
+              </div>
+              <p className="text-muted-foreground mb-4">
+                직장 다니면서 블로그 유지가 불가능했는데,
+              </p>
+              <p className="text-sm text-muted-foreground italic">
+                지금은 AI가 제 대신 성장시키고 있습니다.
+              </p>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Comparison Table */}
+      <section className="py-20 px-4">
+        <div className="container mx-auto max-w-5xl">
+          <div className="text-center space-y-4 mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-foreground">
+              🎯 왜 Potensia AI인가?
+            </h2>
+          </div>
+
+          <Card className="overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-muted">
+                  <tr>
+                    <th className="p-4 text-left font-bold text-foreground">비교 항목</th>
+                    <th className="p-4 text-center font-bold text-primary">Potensia AI</th>
+                    <th className="p-4 text-center font-bold text-muted-foreground">일반 AI 글 생성기</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {[
+                    { item: "SEO 최적화", us: true, them: false },
+                    { item: "썸네일 생성", us: true, them: false },
+                    { item: "워드프레스 연동", us: true, them: false },
+                    { item: "성과 분석", us: true, them: false },
+                    { item: "글 톤/스타일 학습", us: true, them: "partial" },
+                  ].map((row, i) => (
+                    <tr key={i} className="hover:bg-muted/50 transition-colors">
+                      <td className="p-4 font-medium text-foreground">{row.item}</td>
+                      <td className="p-4 text-center">
+                        {row.us && <CheckCircle2 className="h-6 w-6 text-primary mx-auto" />}
+                      </td>
+                      <td className="p-4 text-center">
+                        {row.them === false && <XCircle className="h-6 w-6 text-muted-foreground mx-auto" />}
+                        {row.them === "partial" && <span className="text-muted-foreground">⚠️</span>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="p-6 bg-primary/5 text-center">
+              <p className="text-lg font-bold text-foreground">
+                Potensia AI는 "그냥 글을 쓰는 도구"가 아닙니다.
+              </p>
+              <p className="text-xl font-bold text-primary mt-2">
+                "돈이 되는 콘텐츠 시스템"입니다.
+              </p>
+            </div>
+          </Card>
+        </div>
+      </section>
+
+      {/* Before/After */}
+      <section className="py-20 px-4 bg-muted/30">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center space-y-4 mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-foreground">
+              🧭 이 서비스를 쓰면 이렇게 바뀝니다
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            <Card className="p-8 bg-background border-2">
+              <h3 className="text-2xl font-bold text-muted-foreground mb-6 flex items-center gap-2">
+                <XCircle className="h-6 w-6" />
+                Before
+              </h3>
+              <ul className="space-y-4">
+                {[
+                  "매일 '무엇을 쓸까' 고민",
+                  "블로그 관리에 시간 낭비",
+                  "글은 많은데 수익은 없음",
+                  "블로그는 취미",
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-3 text-muted-foreground">
+                    <span className="text-destructive mt-1">✗</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+
+            <Card className="p-8 bg-gradient-to-br from-primary/10 to-accent/10 border-2 border-primary">
+              <h3 className="text-2xl font-bold text-primary mb-6 flex items-center gap-2">
+                <CheckCircle2 className="h-6 w-6" />
+                After
+              </h3>
+              <ul className="space-y-4">
+                {[
+                  "키워드만 입력하면 완성",
+                  "한 번 설정으로 자동 운영",
+                  "SEO+디자인+자동발행으로 수익 구조화",
+                  "블로그가 자산이 됨",
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-3 text-foreground font-medium">
+                    <CheckCircle2 className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Investment Section */}
+      <section className="py-20 px-4">
+        <div className="container mx-auto max-w-4xl">
+          <Card className="p-12 bg-gradient-to-br from-primary/5 via-accent/5 to-secondary/5 border-2">
+            <div className="text-center space-y-6">
+              <h2 className="text-4xl md:text-5xl font-bold text-foreground">
+                📈 이건 투자입니다, 소비가 아닙니다
+              </h2>
+              <div className="space-y-4 text-lg text-muted-foreground">
+                <p>매일 글을 대신 써주는 AI.</p>
+                <p>매일 클릭 수를 올려주는 자동화.</p>
+                <p>매일 당신 대신 일해주는 시스템.</p>
+              </div>
+              <p className="text-2xl font-bold text-primary">
+                Potensia AI는 당신의 "시간을 복제해주는 서비스"입니다.
+              </p>
+            </div>
+          </Card>
+        </div>
+      </section>
+
+      {/* Final Story */}
+      <section className="py-20 px-4 bg-muted/30">
+        <div className="container mx-auto max-w-4xl text-center">
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-8">
+            🎬 마지막 장면을 상상해보세요
+          </h2>
+          <div className="space-y-6 text-lg text-muted-foreground mb-12">
+            <p>밤 11시. 침대에 누워 있는데,<br />AI가 방금 새 글을 발행합니다.</p>
+            <p>다음 날 아침,<br />트래픽 그래프가 살짝 올라가 있습니다.</p>
+            <p className="text-xl font-bold text-foreground italic">
+              그건 단순한 조회수가 아니라,<br />
+              "시간을 번 사람만이 볼 수 있는 숫자."
+            </p>
+          </div>
+          <Button size="lg" className="text-xl px-16 py-8 shadow-2xl hover:shadow-3xl transition-all" onClick={handleOpenAuthDialog}>
+            <Zap className="mr-2 h-6 w-6" />
+            🪄 지금 바로 Potensia AI를 시작하세요
+          </Button>
+          <p className="text-sm text-muted-foreground mt-6">
+            단 한 번의 클릭이, 매일의 시간을 되찾게 합니다.
+          </p>
         </div>
       </section>
 
