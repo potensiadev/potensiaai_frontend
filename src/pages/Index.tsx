@@ -129,7 +129,7 @@ const Index = () => {
             <Sparkles className="h-6 w-6 text-primary" />
             <span className="text-xl font-bold text-foreground">PotensiaAI</span>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             {!user && (
               <Button variant="ghost" onClick={handleOpenAuthDialog}>
                 로그인
