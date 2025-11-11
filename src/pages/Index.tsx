@@ -150,7 +150,7 @@ const Index = () => {
                 키워드만 입력하면
                 <br />
                 <span className="bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
-                  블로그 자동화로
+                  블로그가 알아서
                   <br />
                   돈을 벌어다 준다
                 </span>
