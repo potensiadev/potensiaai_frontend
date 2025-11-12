@@ -423,6 +423,7 @@ const Write = () => {
         thumbnail_image: selectedThumbnail || null,
         content_length: contentLength,
         content_tone: contentTone,
+        publish_status: "pending",
       });
 
       if (error) throw error;
