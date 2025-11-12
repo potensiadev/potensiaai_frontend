@@ -56,8 +56,8 @@ const Auth = () => {
         title: "계정이 생성되었습니다!",
         description: "자동으로 로그인되었습니다.",
       });
-      
-      navigate("/");
+
+      navigate("/dashboard");
     } catch (error: any) {
       toast({
         title: "회원가입 실패",
@@ -85,8 +85,8 @@ const Auth = () => {
         title: "로그인 성공",
         description: "환영합니다!",
       });
-      
-      navigate("/");
+
+      navigate("/dashboard");
     } catch (error: any) {
       toast({
         title: "로그인 실패",

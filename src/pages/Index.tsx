@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -32,6 +33,7 @@ const Index = () => {
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -78,6 +80,7 @@ const Index = () => {
       setEmail("");
       setPassword("");
       setDisplayName("");
+      navigate("/dashboard");
     } catch (error: any) {
       toast({
         title: "회원가입 실패",
@@ -109,6 +112,7 @@ const Index = () => {
       setShowAuthDialog(false);
       setEmail("");
       setPassword("");
+      navigate("/dashboard");
     } catch (error: any) {
       toast({
         title: "로그인 실패",
@@ -117,6 +121,22 @@ const Index = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "로그아웃 완료",
+        description: "다시 방문해주세요!",
+      });
+    } catch (error: any) {
+      toast({
+        title: "로그아웃 실패",
+        description: error.message || "로그아웃 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -129,13 +149,24 @@ const Index = () => {
             <Sparkles className="h-6 w-6 text-primary" />
             <span className="text-xl font-bold text-foreground">PotensiaAI</span>
           </div>
-          <div className="flex items-center gap-2">
-            {!user && (
-              <Button variant="ghost" onClick={handleOpenAuthDialog}>
-                로그인
-              </Button>
+          <div className="flex items-center gap-4">
+            {user ? (
+              <>
+                <Button variant="ghost" onClick={() => navigate("/dashboard")}>
+                  대시보드
+                </Button>
+                <Button variant="outline" onClick={handleSignOut}>
+                  로그아웃
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" onClick={handleOpenAuthDialog}>
+                  로그인
+                </Button>
+                <Button onClick={handleOpenAuthDialog}>무료 시작하기</Button>
+              </>
             )}
-            <Button onClick={handleOpenAuthDialog}>무료 시작하기</Button>
           </div>
         </div>
       </nav>
