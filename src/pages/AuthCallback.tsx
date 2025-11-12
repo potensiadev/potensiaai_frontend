@@ -11,24 +11,48 @@ const AuthCallback = () => {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // Get the current session after email confirmation
+        // Check if there's a hash in the URL (from email confirmation link)
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+
+        if (accessToken && refreshToken) {
+          // Set the session using the tokens from the URL
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+
+          if (error) throw error;
+
+          if (data.session) {
+            toast({
+              title: "이메일 인증 완료",
+              description: "환영합니다! 대시보드로 이동합니다.",
+            });
+
+            setTimeout(() => {
+              navigate("/dashboard", { replace: true });
+            }, 1000);
+            return;
+          }
+        }
+
+        // Fallback: Try to get existing session
         const { data: { session }, error } = await supabase.auth.getSession();
 
         if (error) throw error;
 
         if (session) {
-          // Email confirmed successfully
           toast({
             title: "이메일 인증 완료",
             description: "환영합니다! 대시보드로 이동합니다.",
           });
 
-          // Redirect to dashboard
           setTimeout(() => {
             navigate("/dashboard", { replace: true });
           }, 1000);
         } else {
-          // No session found
           toast({
             title: "인증 실패",
             description: "로그인이 필요합니다.",
