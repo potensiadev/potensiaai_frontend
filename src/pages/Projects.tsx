@@ -22,6 +22,10 @@ interface ContentPost {
   wordpress_post_id: string | null;
   content_tone: string;
   content_length: string;
+  focus_keyphrase?: string | null;
+  slug?: string | null;
+  meta_description?: string | null;
+  tags?: string[] | null;
 }
 
 const Projects = () => {
@@ -355,6 +359,46 @@ const Projects = () => {
                     </div>
                   )}
                 </div>
+
+                {/* SEO Information */}
+                {(selectedPost?.focus_keyphrase || selectedPost?.slug || selectedPost?.meta_description || selectedPost?.tags) && (
+                  <div className="space-y-3 p-4 bg-muted rounded-lg">
+                    <h4 className="font-semibold text-sm">SEO 정보</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      {selectedPost?.focus_keyphrase && (
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">Focus Keyphrase</p>
+                          <p className="text-sm font-medium">{selectedPost.focus_keyphrase}</p>
+                        </div>
+                      )}
+                      {selectedPost?.slug && (
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">Slug</p>
+                          <p className="text-sm font-mono">{selectedPost.slug}</p>
+                        </div>
+                      )}
+                      {selectedPost?.meta_description && (
+                        <div className="col-span-2">
+                          <p className="text-xs text-muted-foreground mb-1">Meta Description</p>
+                          <p className="text-sm">{selectedPost.meta_description}</p>
+                        </div>
+                      )}
+                      {selectedPost?.tags && selectedPost.tags.length > 0 && (
+                        <div className="col-span-2">
+                          <p className="text-xs text-muted-foreground mb-1">Tags</p>
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {selectedPost.tags.map((tag, idx) => (
+                              <Badge key={idx} variant="outline" className="text-xs">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 <div>
                   <h4 className="font-semibold mb-2">콘텐츠</h4>
                   <div

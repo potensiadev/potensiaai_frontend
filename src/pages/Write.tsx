@@ -54,6 +54,10 @@ interface ContentHistory {
   content_length: string;
   content_tone: string;
   created_at: string;
+  focus_keyphrase?: string | null;
+  slug?: string | null;
+  meta_description?: string | null;
+  tags?: string[] | null;
 }
 
 const Write = () => {
@@ -80,6 +84,10 @@ const Write = () => {
   const [showHistory, setShowHistory] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const [refinedTopic, setRefinedTopic] = useState<string>("");
+  const [focusKeyphrase, setFocusKeyphrase] = useState<string>("");
+  const [slug, setSlug] = useState<string>("");
+  const [metaDescription, setMetaDescription] = useState<string>("");
+  const [tags, setTags] = useState<string>("");
 
   // URL 파라미터에서 제목 불러오기
   useEffect(() => {
@@ -197,6 +205,18 @@ const Write = () => {
         setGeneratedContent(response.content);
         setRefinedTopic(response.refined_topic);
         setValidationResult(response.validation);
+
+        // Auto-fill SEO fields
+        setFocusKeyphrase(response.refined_topic || title.trim());
+        setSlug(title.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''));
+
+        // Extract meta description from content (first 155 characters)
+        const plainText = response.content.replace(/<[^>]*>/g, '').trim();
+        setMetaDescription(plainText.substring(0, 155) + (plainText.length > 155 ? '...' : ''));
+
+        // Auto-generate tags from title
+        const autoTags = title.trim().split(' ').filter(word => word.length > 2).slice(0, 5);
+        setTags(autoTags.join(', '));
 
         toast({
           title: "생성 완료",
@@ -424,6 +444,10 @@ const Write = () => {
         content_length: contentLength,
         content_tone: contentTone,
         publish_status: "pending",
+        focus_keyphrase: focusKeyphrase || null,
+        slug: slug || null,
+        meta_description: metaDescription || null,
+        tags: tags ? tags.split(',').map(tag => tag.trim()) : null,
       });
 
       if (error) throw error;
@@ -666,12 +690,71 @@ const Write = () => {
                 </div>
               </div>
             ) : generatedContent ? (
-              <div className="space-y-4">
-                <Textarea
-                  value={generatedContent}
-                  onChange={(e) => setGeneratedContent(e.target.value)}
-                  className="min-h-[600px] font-mono text-sm"
-                />
+              <div className="space-y-6">
+                <div>
+                  <Label htmlFor="generated-content" className="mb-2 block">생성된 콘텐츠</Label>
+                  <Textarea
+                    id="generated-content"
+                    value={generatedContent}
+                    onChange={(e) => setGeneratedContent(e.target.value)}
+                    className="min-h-[500px] font-mono text-sm"
+                  />
+                </div>
+
+                {/* SEO Fields */}
+                <div className="space-y-4 border-t border-border pt-6">
+                  <h4 className="text-lg font-semibold text-foreground mb-4">SEO 설정</h4>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="focus-keyphrase">Focus Keyphrase</Label>
+                      <Input
+                        id="focus-keyphrase"
+                        placeholder="주요 키워드"
+                        value={focusKeyphrase}
+                        onChange={(e) => setFocusKeyphrase(e.target.value)}
+                      />
+                      <p className="text-xs text-muted-foreground">SEO 최적화를 위한 주요 키워드</p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="slug">Slug</Label>
+                      <Input
+                        id="slug"
+                        placeholder="url-slug"
+                        value={slug}
+                        onChange={(e) => setSlug(e.target.value)}
+                      />
+                      <p className="text-xs text-muted-foreground">URL에 사용될 슬러그</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="meta-description">Meta Description</Label>
+                    <Textarea
+                      id="meta-description"
+                      placeholder="메타 설명 (155자 이내 권장)"
+                      value={metaDescription}
+                      onChange={(e) => setMetaDescription(e.target.value)}
+                      className="min-h-[80px]"
+                      maxLength={160}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      {metaDescription.length}/160 - 검색 결과에 표시될 설명
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="tags">Tags</Label>
+                    <Input
+                      id="tags"
+                      placeholder="태그1, 태그2, 태그3"
+                      value={tags}
+                      onChange={(e) => setTags(e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground">쉼표(,)로 구분하여 입력</p>
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="flex min-h-[400px] items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/30">

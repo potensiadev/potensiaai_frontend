@@ -20,8 +20,12 @@ export type Database = {
           content_length: string
           content_tone: string
           created_at: string
+          focus_keyphrase: string | null
           id: string
+          meta_description: string | null
           publish_status: string | null
+          slug: string | null
+          tags: string[] | null
           thumbnail_image: string | null
           title: string
           user_id: string
@@ -32,8 +36,12 @@ export type Database = {
           content_length: string
           content_tone: string
           created_at?: string
+          focus_keyphrase?: string | null
           id?: string
+          meta_description?: string | null
           publish_status?: string | null
+          slug?: string | null
+          tags?: string[] | null
           thumbnail_image?: string | null
           title: string
           user_id: string
@@ -44,8 +52,12 @@ export type Database = {
           content_length?: string
           content_tone?: string
           created_at?: string
+          focus_keyphrase?: string | null
           id?: string
+          meta_description?: string | null
           publish_status?: string | null
+          slug?: string | null
+          tags?: string[] | null
           thumbnail_image?: string | null
           title?: string
           user_id?: string
