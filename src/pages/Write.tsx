@@ -531,18 +531,20 @@ const Write = () => {
             </h3>
 
             <div className="space-y-4">
-              <div className="flex gap-4 items-end">
-                <div className="flex-1 space-y-2">
-                  <Label htmlFor="title">제목</Label>
-                  <Input
-                    id="title"
-                    placeholder="글 제목을 입력하세요"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                  />
-                </div>
+              {/* 제목 입력란 - 첫 줄 */}
+              <div className="space-y-2">
+                <Label htmlFor="title">제목</Label>
+                <Input
+                  id="title"
+                  placeholder="글 제목을 입력하세요"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
+              </div>
 
-                <div className="w-48 space-y-2">
+              {/* 글 길이 & 글 톤 - 둘째 줄 */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
                   <Label htmlFor="content-length">글 길이</Label>
                   <Select value={contentLength} onValueChange={setContentLength}>
                     <SelectTrigger id="content-length">
@@ -556,7 +558,7 @@ const Write = () => {
                   </Select>
                 </div>
 
-                <div className="w-48 space-y-2">
+                <div className="space-y-2">
                   <Label htmlFor="content-tone">글 톤</Label>
                   <Select value={contentTone} onValueChange={setContentTone}>
                     <SelectTrigger id="content-tone">
@@ -569,17 +571,18 @@ const Write = () => {
                     </SelectContent>
                   </Select>
                 </div>
-
-                <Button
-                  className="bg-gradient-primary shadow-glow"
-                  size="lg"
-                  onClick={handleGenerateContent}
-                  disabled={generating || !title.trim()}
-                >
-                  <Sparkles className="mr-2 h-5 w-5" />
-                  {generating ? "생성 중..." : "콘텐츠 생성"}
-                </Button>
               </div>
+
+              {/* 콘텐츠 생성 버튼 - 셋째 줄 */}
+              <Button
+                className="w-full bg-gradient-primary shadow-glow"
+                size="lg"
+                onClick={handleGenerateContent}
+                disabled={generating || !title.trim()}
+              >
+                <Sparkles className="mr-2 h-5 w-5" />
+                {generating ? "생성 중..." : "콘텐츠 생성"}
+              </Button>
 
               {/* Refined Title Suggestions */}
               {loading && (
