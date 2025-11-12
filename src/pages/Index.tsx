@@ -58,7 +58,7 @@ const Index = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -71,16 +71,33 @@ const Index = () => {
 
       if (error) throw error;
 
-      toast({
-        title: "계정이 생성되었습니다!",
-        description: "자동으로 로그인되었습니다.",
-      });
+      if (data.session) {
+        // User is automatically logged in
+        toast({
+          title: "계정이 생성되었습니다!",
+          description: "자동으로 로그인되었습니다.",
+        });
 
-      setShowAuthDialog(false);
-      setEmail("");
-      setPassword("");
-      setDisplayName("");
-      navigate("/dashboard");
+        setShowAuthDialog(false);
+        setEmail("");
+        setPassword("");
+        setDisplayName("");
+
+        // Wait a bit for auth state to update
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 100);
+      } else {
+        // Email confirmation required
+        toast({
+          title: "계정이 생성되었습니다!",
+          description: "이메일을 확인하여 계정을 인증해주세요.",
+        });
+        setShowAuthDialog(false);
+        setEmail("");
+        setPassword("");
+        setDisplayName("");
+      }
     } catch (error: any) {
       toast({
         title: "회원가입 실패",
@@ -97,22 +114,28 @@ const Index = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) throw error;
 
-      toast({
-        title: "로그인 성공",
-        description: "환영합니다!",
-      });
+      if (data.session) {
+        toast({
+          title: "로그인 성공",
+          description: "환영합니다!",
+        });
 
-      setShowAuthDialog(false);
-      setEmail("");
-      setPassword("");
-      navigate("/dashboard");
+        setShowAuthDialog(false);
+        setEmail("");
+        setPassword("");
+
+        // Wait a bit for auth state to update
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 100);
+      }
     } catch (error: any) {
       toast({
         title: "로그인 실패",
